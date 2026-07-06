@@ -1,0 +1,13 @@
+{
+  "system_prompt_file": "mijeokbun1_solver_system_prompt_v0_1.md",
+  "user_message_template": "[문제 이미지]\n{image}\n\n[인식한 문제]\n{recognized_problem}\n\n[검색된 개념카드]\n{retrieved_cards}\n\n위 개념카드를 우선 참고하여 정해진 형식으로 풀이하라.",
+  "answer_sections": [
+    "문제 읽기",
+    "사용 개념",
+    "풀이 전략",
+    "단계별 풀이",
+    "정답",
+    "검산",
+    "비슷한 문제 팁"
+  ]
+}

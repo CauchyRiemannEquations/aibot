@@ -220,9 +220,11 @@ export default function HomePage() {
               <div className="sub-card-head">
                 <h2>문제 읽기</h2>
               </div>
-              <p className="recognized-problem">
-                {recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'}
-              </p>
+              <div className="recognized-problem">
+                <MarkdownViewer
+                  content={recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'}
+                />
+              </div>
             </div>
 
             {!!retrievedCards.length ? (

@@ -1,8 +1,8 @@
 import { Agent } from 'undici';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_VISION_MODEL = 'google/gemini-flash-latest';
-const DEFAULT_SOLVER_MODEL = 'google/gemini-flash-latest';
+const DEFAULT_VISION_MODEL = 'google/gemini-2.5-flash';
+const DEFAULT_SOLVER_MODEL = 'google/gemini-2.5-flash';
 
 const insecureTlsAgent = new Agent({
   connect: {
@@ -147,7 +147,7 @@ function extractMessageText(content: OpenRouterMessageContent): string {
 function stripMarkdownFence(text: string): string {
   return text
     .replace(/^```(?:text|markdown|latex)?\s*/i, '')
-    .replace(/```$/i, '')
+    .replace(/\s*```$/i, '')
     .trim();
 }
 
@@ -168,9 +168,13 @@ export async function recognizeProblemFromImage(
           content: [
             '너는 한국 고등학교 수학 문제 사진을 정확히 읽는 OCR 보조 AI다.',
             '풀이하지 말고, 사진 속 문제 문장과 수식만 정리한다.',
-            '수식은 가능한 LaTeX로 정리한다.',
+            '답변은 반드시 Markdown 형식으로 작성한다.',
+            '인라인 수식은 반드시 $...$로 감싼다.',
+            '중요하거나 긴 수식은 반드시 $$...$$로 감싼다.',
+            'raw LaTeX 명령어를 수식 구분자 없이 출력하지 않는다.',
             '보이지 않거나 애매한 부분은 추측하지 말고 [판독 불가]라고 표시한다.',
-            '답변에는 문제 인식 결과만 포함하고, 해설이나 정답은 절대 쓰지 않는다.',
+            '해설, 풀이, 정답은 절대 쓰지 않는다.',
+            '코드블록은 사용하지 않는다.',
           ].join('\n'),
         },
         {
@@ -179,9 +183,12 @@ export async function recognizeProblemFromImage(
             {
               type: 'text',
               text: [
-                '사진 속 고등학교 수학 문제를 읽어 주세요.',
+                '사진 속 고등학교 수학 문제를 정확히 읽어 주세요.',
                 '조건, 보기, 그래프 설명, 구하라는 값을 빠뜨리지 마세요.',
-                '문제가 여러 개라면 가장 크게 보이는 문제 하나를 우선 정리하세요.',
+                '수식은 반드시 Markdown LaTeX로 작성하세요.',
+                '예: $\\lim_{x \\to 2} \\frac{x^2-4}{x-2}$',
+                '예: $$\\int_0^1 f(x)\\,dx$$',
+                '풀이와 정답은 쓰지 마세요.',
                 `이미지 형식: ${mimeType}`,
               ].join('\n'),
             },

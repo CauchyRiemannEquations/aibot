@@ -1,4 +1,12 @@
+import { Agent } from 'undici';
+
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+const insecureTlsAgent = new Agent({
+  connect: {
+    rejectUnauthorized: false,
+  },
+});
 
 function getApiKey(): string {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -11,7 +19,11 @@ function getApiKey(): string {
 }
 
 async function openRouterRequest(body: Record<string, unknown>) {
-  const response = await fetch(OPENROUTER_URL, {
+  const allowInsecureTls =
+    process.env.OPENROUTER_ALLOW_INSECURE_TLS === 'true' ||
+    process.env.OPENROUTER_ALLOW_INSECURE_TLS === '1';
+
+  const requestInit: RequestInit & { dispatcher?: Agent } = {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${getApiKey()}`,
@@ -20,7 +32,13 @@ async function openRouterRequest(body: Record<string, unknown>) {
       'X-Title': 'mijeokbun1-photo-solver-mvp',
     },
     body: JSON.stringify(body),
-  });
+  };
+
+  if (allowInsecureTls) {
+    requestInit.dispatcher = insecureTlsAgent;
+  }
+
+  const response = await fetch(OPENROUTER_URL, requestInit);
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -28,6 +46,37 @@ async function openRouterRequest(body: Record<string, unknown>) {
   }
 
   return response.json();
+}
+
+function extractMessageText(content: unknown): string {
+  if (typeof content === 'string') {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => {
+        if (typeof item === 'string') {
+          return item;
+        }
+
+        if (
+          item &&
+          typeof item === 'object' &&
+          'type' in item &&
+          (item as { type?: string }).type === 'text' &&
+          'text' in item
+        ) {
+          return String((item as { text?: unknown }).text ?? '');
+        }
+
+        return '';
+      })
+      .join('\n')
+      .trim();
+  }
+
+  return '';
 }
 
 export async function recognizeProblemFromImage(
@@ -71,7 +120,7 @@ export async function recognizeProblemFromImage(
     ],
   });
 
-  return result.choices?.[0]?.message?.content?.trim() || '';
+  return extractMessageText(result.choices?.[0]?.message?.content);
 }
 
 export async function generateSolution(params: {
@@ -98,5 +147,5 @@ export async function generateSolution(params: {
     ],
   });
 
-  return result.choices?.[0]?.message?.content?.trim() || '';
+  return extractMessageText(result.choices?.[0]?.message?.content);
 }

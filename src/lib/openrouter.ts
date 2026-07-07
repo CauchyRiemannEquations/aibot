@@ -1,6 +1,8 @@
 import { Agent } from 'undici';
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_VISION_MODEL = 'google/gemini-flash-latest';
+const DEFAULT_SOLVER_MODEL = 'google/gemini-flash-latest';
 
 const insecureTlsAgent = new Agent({
   connect: {
@@ -8,29 +10,66 @@ const insecureTlsAgent = new Agent({
   },
 });
 
+type OpenRouterMessageContent =
+  | string
+  | Array<
+      | string
+      | {
+          type?: string;
+          text?: unknown;
+          content?: unknown;
+        }
+    >
+  | {
+      text?: unknown;
+      content?: unknown;
+    }
+  | null
+  | undefined;
+
+type OpenRouterResponse = {
+  choices?: Array<{
+    message?: {
+      content?: OpenRouterMessageContent;
+    };
+  }>;
+  error?: {
+    message?: string;
+    code?: string;
+  };
+};
+
 function getApiKey(): string {
   const apiKey = process.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    throw new Error('OPENROUTER_API_KEY is missing');
+    throw new Error('OPENROUTER_API_KEY is missing. OpenRouter API 키를 서버 환경변수에 설정해 주세요.');
   }
 
   return apiKey;
 }
 
-async function openRouterRequest(body: Record<string, unknown>) {
+function getModel(envName: string, fallbackModel: string): string {
+  return process.env[envName]?.trim() || fallbackModel;
+}
+
+function getOpenRouterHeaders(): Record<string, string> {
+  return {
+    Authorization: `Bearer ${getApiKey()}`,
+    'Content-Type': 'application/json',
+    'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
+    'X-Title': process.env.OPENROUTER_APP_TITLE || 'mijeokbun1-photo-solver-mvp',
+  };
+}
+
+async function openRouterRequest(body: Record<string, unknown>, label = 'chat') {
   const allowInsecureTls =
     process.env.OPENROUTER_ALLOW_INSECURE_TLS === 'true' ||
     process.env.OPENROUTER_ALLOW_INSECURE_TLS === '1';
 
   const requestInit: RequestInit & { dispatcher?: Agent } = {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${getApiKey()}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'http://localhost:3000',
-      'X-Title': 'mijeokbun1-photo-solver-mvp',
-    },
+    headers: getOpenRouterHeaders(),
     body: JSON.stringify(body),
   };
 
@@ -39,16 +78,30 @@ async function openRouterRequest(body: Record<string, unknown>) {
   }
 
   const response = await fetch(OPENROUTER_URL, requestInit);
+  const responseText = await response.text();
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`OpenRouter request failed: ${response.status} ${errorText}`);
+    throw new Error(`OpenRouter ${label} request failed: ${response.status} ${responseText}`);
   }
 
-  return response.json();
+  try {
+    const parsed = JSON.parse(responseText) as OpenRouterResponse;
+
+    if (parsed.error?.message) {
+      throw new Error(`OpenRouter ${label} error: ${parsed.error.message}`);
+    }
+
+    return parsed;
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new Error(`OpenRouter ${label} returned non-JSON response: ${responseText.slice(0, 300)}`);
+    }
+
+    throw error;
+  }
 }
 
-function extractMessageText(content: unknown): string {
+function extractMessageText(content: OpenRouterMessageContent): string {
   if (typeof content === 'string') {
     return content.trim();
   }
@@ -60,14 +113,16 @@ function extractMessageText(content: unknown): string {
           return item;
         }
 
-        if (
-          item &&
-          typeof item === 'object' &&
-          'type' in item &&
-          (item as { type?: string }).type === 'text' &&
-          'text' in item
-        ) {
-          return String((item as { text?: unknown }).text ?? '');
+        if (!item || typeof item !== 'object') {
+          return '';
+        }
+
+        if (typeof item.text === 'string') {
+          return item.text;
+        }
+
+        if (typeof item.content === 'string') {
+          return item.content;
         }
 
         return '';
@@ -76,76 +131,111 @@ function extractMessageText(content: unknown): string {
       .trim();
   }
 
+  if (content && typeof content === 'object') {
+    if (typeof content.text === 'string') {
+      return content.text.trim();
+    }
+
+    if (typeof content.content === 'string') {
+      return content.content.trim();
+    }
+  }
+
   return '';
+}
+
+function stripMarkdownFence(text: string): string {
+  return text
+    .replace(/^```(?:text|markdown|latex)?\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
 }
 
 export async function recognizeProblemFromImage(
   base64DataUrl: string,
   mimeType: string,
 ): Promise<string> {
-  const model = process.env.OPENROUTER_VISION_MODEL;
+  const model = getModel('OPENROUTER_VISION_MODEL', DEFAULT_VISION_MODEL);
 
-  if (!model) {
-    throw new Error('OPENROUTER_VISION_MODEL is missing');
+  const result = await openRouterRequest(
+    {
+      model,
+      temperature: 0,
+      max_tokens: 1200,
+      messages: [
+        {
+          role: 'system',
+          content: [
+            '너는 한국 고등학교 수학 문제 사진을 정확히 읽는 OCR 보조 AI다.',
+            '풀이하지 말고, 사진 속 문제 문장과 수식만 정리한다.',
+            '수식은 가능한 LaTeX로 정리한다.',
+            '보이지 않거나 애매한 부분은 추측하지 말고 [판독 불가]라고 표시한다.',
+            '답변에는 문제 인식 결과만 포함하고, 해설이나 정답은 절대 쓰지 않는다.',
+          ].join('\n'),
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: [
+                '사진 속 고등학교 수학 문제를 읽어 주세요.',
+                '조건, 보기, 그래프 설명, 구하라는 값을 빠뜨리지 마세요.',
+                '문제가 여러 개라면 가장 크게 보이는 문제 하나를 우선 정리하세요.',
+                `이미지 형식: ${mimeType}`,
+              ].join('\n'),
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: base64DataUrl,
+                detail: 'high',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    'vision OCR',
+  );
+
+  const recognizedText = stripMarkdownFence(
+    extractMessageText(result.choices?.[0]?.message?.content),
+  );
+
+  if (!recognizedText) {
+    throw new Error(
+      `OpenRouter vision OCR returned an empty response. 사용 모델(${model})이 이미지 입력을 지원하는지 확인해 주세요.`,
+    );
   }
 
-  const result = await openRouterRequest({
-    model,
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You read a Korean high-school calculus problem image. Return only the recognized problem statement in Korean with readable math notation and LaTeX where helpful. Do not solve it.',
-      },
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: '사진 속 문제를 정확히 읽어서 문제 문장만 정리해 주세요. 풀이와 설명은 쓰지 마세요.',
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: base64DataUrl,
-              detail: 'high',
-            },
-          },
-          {
-            type: 'text',
-            text: `이미지 형식: ${mimeType}`,
-          },
-        ],
-      },
-    ],
-  });
-
-  return extractMessageText(result.choices?.[0]?.message?.content);
+  return recognizedText;
 }
 
 export async function generateSolution(params: {
   systemPrompt: string;
   userPrompt: string;
 }): Promise<string> {
-  const model = process.env.OPENROUTER_SOLVER_MODEL;
+  const model = getModel('OPENROUTER_SOLVER_MODEL', DEFAULT_SOLVER_MODEL);
 
-  if (!model) {
-    throw new Error('OPENROUTER_SOLVER_MODEL is missing');
-  }
-
-  const result = await openRouterRequest({
-    model,
-    messages: [
-      {
-        role: 'system',
-        content: params.systemPrompt,
-      },
-      {
-        role: 'user',
-        content: params.userPrompt,
-      },
-    ],
-  });
+  const result = await openRouterRequest(
+    {
+      model,
+      temperature: 0.2,
+      max_tokens: 3000,
+      messages: [
+        {
+          role: 'system',
+          content: params.systemPrompt,
+        },
+        {
+          role: 'user',
+          content: params.userPrompt,
+        },
+      ],
+    },
+    'solver',
+  );
 
   return extractMessageText(result.choices?.[0]?.message?.content);
 }

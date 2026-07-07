@@ -5,13 +5,20 @@ import path from 'node:path';
 import { SECTION_KEYS, SECTION_LABELS } from '@/lib/constants';
 import type { RetrievedCard, SolverSections } from '@/lib/types';
 import type { SubjectDefinition } from '@/lib/subjects';
+import type { SubjectId } from '@/lib/types';
 
-const systemPromptPath = path.join(
-  process.cwd(),
-  'mijeokbun1_solver_system_prompt_v0_1.md',
-);
+const SYSTEM_PROMPT_FILE_BY_SUBJECT: Record<SubjectId, string> = {
+  'calculus-1': 'mijeokbun1_solver_system_prompt_v0_1.md',
+  algebra: 'algebra_solver_system_prompt_v0_1.md',
+  'calculus-2': 'mijeokbun1_solver_system_prompt_v0_1.md',
+  geometry: 'mijeokbun1_solver_system_prompt_v0_1.md',
+  probability: 'mijeokbun1_solver_system_prompt_v0_1.md',
+};
 
-export const loadSystemPrompt = cache(async (): Promise<string> => {
+export const loadSystemPromptBySubject = cache(async (subjectId: SubjectId): Promise<string> => {
+  const fileName =
+    SYSTEM_PROMPT_FILE_BY_SUBJECT[subjectId] ?? SYSTEM_PROMPT_FILE_BY_SUBJECT['calculus-1'];
+  const systemPromptPath = path.join(process.cwd(), fileName);
   const basePrompt = await fs.readFile(systemPromptPath, 'utf8');
 
   return `${basePrompt}
@@ -31,6 +38,10 @@ export const loadSystemPrompt = cache(async (): Promise<string> => {
 <check>...</check>
 <similarTip>...</similarTip>`;
 });
+
+export const loadSystemPrompt = cache(async (): Promise<string> =>
+  loadSystemPromptBySubject('calculus-1'),
+);
 
 export function buildSolverUserPrompt(
   problemText: string,

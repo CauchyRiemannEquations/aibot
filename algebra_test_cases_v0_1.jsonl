@@ -1,0 +1,6 @@
+{"id": "TC-EXPLOG-05-001", "unit": "지수함수와 로그함수", "problem_text": "$2^{x+1}=8^{x-2}$를 풀어라.", "expected_cards": ["ALG-EXPLOG-05"], "checkpoints": ["같은 밑", "지수 비교", "일차방정식"]}
+{"id": "TC-EXPLOG-10-001", "unit": "지수함수와 로그함수", "problem_text": "$\\log_2(x-1)+\\log_2 x=1$을 풀어라.", "expected_cards": ["ALG-EXPLOG-10", "ALG-EXPLOG-08"], "checkpoints": ["진수 조건", "로그 성질", "무연근 확인"]}
+{"id": "TC-TRIG-08-001", "unit": "삼각함수", "problem_text": "$0\\le x<2\\pi$에서 $\\sin x=\\frac12$를 풀어라.", "expected_cards": ["ALG-TRIG-08", "ALG-TRIG-04"], "checkpoints": ["기준각", "사분면", "범위 안 모든 해"]}
+{"id": "TC-TRIG-11-001", "unit": "삼각함수", "problem_text": "$b=5$, $c=7$, $A=60^\\circ$일 때 $a$를 구하여라.", "expected_cards": ["ALG-TRIG-11"], "checkpoints": ["코사인법칙", "끼인각", "제곱근"]}
+{"id": "TC-SEQ-03-001", "unit": "수열", "problem_text": "등차수열 $2,5,8,\\cdots$의 첫 20개 항의 합을 구하여라.", "expected_cards": ["ALG-SEQ-03"], "checkpoints": ["첫째항", "공차", "항의 개수", "합 공식"]}
+{"id": "TC-SEQ-13-001", "unit": "수열", "problem_text": "$1+2+\\cdots+n=\\frac{n(n+1)}2$임을 수학적 귀납법으로 증명하여라.", "expected_cards": ["ALG-SEQ-13", "ALG-SEQ-07"], "checkpoints": ["초기 단계", "귀납 가정", "귀납 단계", "결론"]}

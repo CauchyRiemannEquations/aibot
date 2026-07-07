@@ -1,5 +1,5 @@
 export type SubjectDefinition = {
-  id: string;
+  id: import('@/lib/types').SubjectId;
   label: string;
   shortLabel: string;
   status: 'active' | 'planned';
@@ -20,6 +20,17 @@ export const SUBJECTS: SubjectDefinition[] = [
     scope: '미적분Ⅰ 범위 안에서 풀이한다.',
     solverInstruction:
       '현재 활성 과목은 미적분Ⅰ이다. 제공된 개념카드를 우선 참고하고, 범위를 벗어나는 설명은 최소화한다.',
+  },
+  {
+    id: 'algebra',
+    label: '대수',
+    shortLabel: '대수',
+    status: 'active',
+    note: '사용 가능',
+    description: '지수함수와 로그함수, 삼각함수, 수열 중심의 사진 문제풀이',
+    scope: '대수 범위 안에서 풀이한다.',
+    solverInstruction:
+      '현재 활성 과목은 대수이다. 제공된 대수 개념카드를 우선 참고하고, 범위를 벗어나는 설명은 최소화한다.',
   },
   {
     id: 'calculus-2',

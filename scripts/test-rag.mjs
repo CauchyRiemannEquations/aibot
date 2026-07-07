@@ -2,8 +2,16 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
-const cardsPath = path.join(root, 'mijeokbun1_ai_rag_cards_v0_1.jsonl');
-const testsPath = path.join(root, 'mijeokbun1_test_cases_v0_1.jsonl');
+const DATASET_BY_SUBJECT = {
+  'calculus-1': {
+    cardsPath: path.join(root, 'mijeokbun1_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'mijeokbun1_test_cases_v0_1.jsonl'),
+  },
+  algebra: {
+    cardsPath: path.join(root, 'algebra_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'algebra_test_cases_v0_1.jsonl'),
+  },
+};
 
 function normalizeText(value) {
   return value.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
@@ -90,33 +98,52 @@ function retrieveRelevantCards(problemText, cards, topK = 3) {
     .slice(0, topK);
 }
 
-const cards = (await fs.readFile(cardsPath, 'utf8'))
-  .split(/\r?\n/)
-  .filter(Boolean)
-  .map((line) => JSON.parse(line));
+const requestedSubject = process.argv[2];
+const subjectsToRun = requestedSubject ? [requestedSubject] : Object.keys(DATASET_BY_SUBJECT);
 
-const tests = (await fs.readFile(testsPath, 'utf8'))
-  .split(/\r?\n/)
-  .filter(Boolean)
-  .map((line) => JSON.parse(line));
+for (const subjectId of subjectsToRun) {
+  const dataset = DATASET_BY_SUBJECT[subjectId];
 
-const results = tests.map((testCase) => {
-  const matched = retrieveRelevantCards(testCase.problem_text, cards, 3).map((card) => card.id);
-  const hit = testCase.expected_cards.some((id) => matched.includes(id));
+  if (!dataset) {
+    console.error(`Unknown subject: ${subjectId}`);
+    process.exitCode = 1;
+    continue;
+  }
 
-  return {
-    id: testCase.id,
-    matched,
-    expected: testCase.expected_cards,
-    hit,
-  };
-});
+  const cards = (await fs.readFile(dataset.cardsPath, 'utf8'))
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
 
-for (const result of results) {
-  console.log(`${result.id}: ${result.hit ? 'PASS' : 'MISS'}`);
-  console.log(`  matched: ${result.matched.join(', ')}`);
-  console.log(`  expected: ${result.expected.join(', ')}`);
+  const tests = (await fs.readFile(dataset.testsPath, 'utf8'))
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+
+  const results = tests.map((testCase) => {
+    const matched = retrieveRelevantCards(testCase.problem_text, cards, 3).map((card) => card.id);
+    const hit = testCase.expected_cards.some((id) => matched.includes(id));
+
+    return {
+      id: testCase.id,
+      matched,
+      expected: testCase.expected_cards,
+      hit,
+    };
+  });
+
+  console.log(`\n[${subjectId}]`);
+
+  for (const result of results) {
+    console.log(`${result.id}: ${result.hit ? 'PASS' : 'MISS'}`);
+    console.log(`  matched: ${result.matched.join(', ')}`);
+    console.log(`  expected: ${result.expected.join(', ')}`);
+  }
+
+  const passCount = results.filter((result) => result.hit).length;
+  console.log(`Summary: ${passCount}/${results.length} test cases matched at least one expected card.`);
+
+  if (passCount !== results.length) {
+    process.exitCode = 1;
+  }
 }
-
-const passCount = results.filter((result) => result.hit).length;
-console.log(`\nSummary: ${passCount}/${results.length} test cases matched at least one expected card.`);

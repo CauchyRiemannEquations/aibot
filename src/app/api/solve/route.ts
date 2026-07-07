@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 
-import { loadConceptCards } from '@/lib/cards';
-import { buildSolverUserPrompt, loadSystemPrompt, normalizeSolverSections, sectionsToMarkdown } from '@/lib/prompts';
+import { loadConceptCardsBySubject } from '@/lib/cards';
+import { buildSolverUserPrompt, loadSystemPromptBySubject, normalizeSolverSections, sectionsToMarkdown } from '@/lib/prompts';
 import { generateSolution } from '@/lib/openrouter';
 import { retrieveRelevantCards } from '@/lib/rag';
 import { getSubjectById } from '@/lib/subjects';
+import type { SubjectId } from '@/lib/types';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const recognizedProblem = body?.recognizedProblem;
-    const subjectId = typeof body?.subjectId === 'string' ? body.subjectId : 'calculus-1';
+    const subjectId = (typeof body?.subjectId === 'string' ? body.subjectId : 'calculus-1') as SubjectId;
     const subject = getSubjectById(subjectId);
 
     if (typeof recognizedProblem !== 'string' || !recognizedProblem.trim()) {
@@ -28,8 +29,8 @@ export async function POST(request: Request) {
     }
 
     const [cards, systemPrompt] = await Promise.all([
-      loadConceptCards(),
-      loadSystemPrompt(),
+      loadConceptCardsBySubject(subject.id),
+      loadSystemPromptBySubject(subject.id),
     ]);
 
     const retrievedCards = retrieveRelevantCards(recognizedProblem, cards, 3);

@@ -37,6 +37,7 @@ export type SolverSections = Record<SectionKey, string>;
 
 export type SubjectId =
   | 'calculus-1'
+  | 'algebra'
   | 'calculus-2'
   | 'geometry'
   | 'probability';

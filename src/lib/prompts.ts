@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import { SECTION_KEYS, SECTION_LABELS } from '@/lib/constants';
 import type { RetrievedCard, SolverSections } from '@/lib/types';
+import type { SubjectDefinition } from '@/lib/subjects';
 
 const systemPromptPath = path.join(
   process.cwd(),
@@ -31,7 +32,11 @@ export const loadSystemPrompt = cache(async (): Promise<string> => {
 <similarTip>...</similarTip>`;
 });
 
-export function buildSolverUserPrompt(problemText: string, cards: RetrievedCard[]): string {
+export function buildSolverUserPrompt(
+  problemText: string,
+  cards: RetrievedCard[],
+  subject: SubjectDefinition,
+): string {
   const cardsText = cards.length
     ? cards
         .map(
@@ -46,9 +51,15 @@ export function buildSolverUserPrompt(problemText: string, cards: RetrievedCard[
             ].join('\n'),
         )
         .join('\n\n---\n\n')
-    : '검색된 개념카드가 없습니다. 미적분 I 범위 안에서 풀이하세요.';
+    : `검색된 개념카드가 없습니다. ${subject.scope}`;
 
-  return `[인식한 문제]
+  return `[활성 과목]
+${subject.label}
+
+[과목 지침]
+${subject.solverInstruction}
+
+[인식한 문제]
 ${problemText}
 
 [검색된 개념카드]

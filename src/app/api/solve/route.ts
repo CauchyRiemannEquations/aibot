@@ -4,15 +4,25 @@ import { loadConceptCards } from '@/lib/cards';
 import { buildSolverUserPrompt, loadSystemPrompt, normalizeSolverSections, sectionsToMarkdown } from '@/lib/prompts';
 import { generateSolution } from '@/lib/openrouter';
 import { retrieveRelevantCards } from '@/lib/rag';
+import { getSubjectById } from '@/lib/subjects';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const recognizedProblem = body?.recognizedProblem;
+    const subjectId = typeof body?.subjectId === 'string' ? body.subjectId : 'calculus-1';
+    const subject = getSubjectById(subjectId);
 
     if (typeof recognizedProblem !== 'string' || !recognizedProblem.trim()) {
       return NextResponse.json(
         { error: '문제를 먼저 읽어 온 뒤 풀이를 시작해 주세요.' },
+        { status: 400 },
+      );
+    }
+
+    if (subject.status !== 'active') {
+      return NextResponse.json(
+        { error: `${subject.label} 과목은 아직 준비 중이에요. 지금은 미적분Ⅰ부터 사용할 수 있어요.` },
         { status: 400 },
       );
     }
@@ -23,7 +33,7 @@ export async function POST(request: Request) {
     ]);
 
     const retrievedCards = retrieveRelevantCards(recognizedProblem, cards, 3);
-    const userPrompt = buildSolverUserPrompt(recognizedProblem, retrievedCards);
+    const userPrompt = buildSolverUserPrompt(recognizedProblem, retrievedCards, subject);
     const rawSolution = await generateSolution({
       systemPrompt,
       userPrompt,
@@ -33,6 +43,10 @@ export async function POST(request: Request) {
     const markdown = sectionsToMarkdown(sections);
 
     return NextResponse.json({
+      subject: {
+        id: subject.id,
+        label: subject.label,
+      },
       recognizedProblem,
       retrievedCards: retrievedCards.map((card) => ({
         id: card.id,

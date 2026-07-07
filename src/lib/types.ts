@@ -34,3 +34,9 @@ export type SectionKey =
   | 'similarTip';
 
 export type SolverSections = Record<SectionKey, string>;
+
+export type SubjectId =
+  | 'calculus-1'
+  | 'calculus-2'
+  | 'geometry'
+  | 'probability';

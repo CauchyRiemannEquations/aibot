@@ -25,8 +25,21 @@ type SolveResponse = {
 };
 
 const SOLVING_SCOPE_LABEL = '전체 고등학교 수학 통합 풀이';
-const SOLVING_SCOPE_SUBJECTS =
-  '공통수학Ⅰ · 공통수학Ⅱ · 대수 · 미적분Ⅰ · 미적분Ⅱ · 확률과 통계 · 기하';
+const SOLVING_SCOPE_SUBJECTS = [
+  '공통수학Ⅰ',
+  '공통수학Ⅱ',
+  '대수',
+  '미적분Ⅰ',
+  '미적분Ⅱ',
+  '확률과 통계',
+  '기하',
+];
+
+const FLOW_STEPS = [
+  '1. 사진 업로드',
+  '2. 문제 인식',
+  '3. 단계별 풀이',
+];
 
 export default function HomePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -135,26 +148,60 @@ export default function HomePage() {
     <div className="app-shell">
       <header className="app-topbar">
         <div className="app-topbar-inner">
-          <div className="app-brand">
-            <span className="app-brand-mark">AI</span>
-            <span className="app-brand-text">aibot</span>
+          <div className="brand-lockup">
+            <div className="brand-logo-wrap">
+              <img src="/robot-mascot.png" alt="풀이 로봇 마스코트" className="brand-logo" />
+            </div>
+            <div className="brand-copy">
+              <span className="brand-name">풀리</span>
+            </div>
           </div>
+          <button type="button" className="hero-launch-button">
+            시작하기
+          </button>
         </div>
       </header>
 
       <main className="app-page">
-        <section className="scope-banner">
-          <div>
-            <p className="scope-label">문제풀이 범위</p>
-            <h1>{SOLVING_SCOPE_LABEL}</h1>
-            <p className="scope-subjects">{SOLVING_SCOPE_SUBJECTS}</p>
+        <section className="flow-tabs" aria-label="문제풀이 단계">
+          {FLOW_STEPS.map((step, index) => (
+            <div key={step} className={`flow-tab${index === 0 ? ' is-active' : ''}`}>
+              {step}
+            </div>
+          ))}
+        </section>
+
+        <section className="hero-panel">
+          <div className="hero-copy">
+            <p className="hero-eyebrow">AI 수학 풀이 도우미</p>
+            <h1>
+              수학 문제, 사진만 올리면
+              <br />
+              <span>풀리</span>가 읽고 풀어줘요.
+            </h1>
+            <p className="hero-description">
+              과목을 고를 필요 없이 전체 고등학교 수학 범위에서 필요한 개념을 찾고,
+              단계별 풀이로 정리해 드려요.
+            </p>
+            <div className="hero-scope-card">
+              <p className="scope-title">문제풀이 범위</p>
+              <p className="scope-main">{SOLVING_SCOPE_LABEL}</p>
+              <p className="scope-list">{SOLVING_SCOPE_SUBJECTS.join(' · ')}</p>
+            </div>
           </div>
+
+          <aside className="hero-assistant-card">
+            <div className="hero-assistant-bubble">
+              사진 업로드부터 사용 개념 정리까지 한 화면에서 도와드릴게요.
+            </div>
+            <img src="/robot-mascot.png" alt="수학 도우미 로봇" className="hero-robot" />
+          </aside>
         </section>
 
         <section className="subject-tabs-wrap">
           <div className="section-heading">
             <h2>과목별 개념노트</h2>
-            <p>과목 탭은 개념노트 탐색용입니다. 문제풀이는 과목 선택 없이 전체 수학 범위에서 진행됩니다.</p>
+            <p>탭은 개념 탐색용이에요. 문제풀이는 어떤 탭을 눌러도 항상 전체 수학 범위에서 진행됩니다.</p>
           </div>
 
           <div className="subject-tabs">
@@ -190,8 +237,10 @@ export default function HomePage() {
         <section className="app-grid">
           <article className="main-card upload-card">
             <div className="card-head">
-              <h2>문제 사진 올리기</h2>
-              <span className="card-badge">{SOLVING_SCOPE_LABEL}</span>
+              <div>
+                <h2>문제 사진 올리기</h2>
+                <p className="card-subtitle">PNG, JPG 파일을 올리면 문제를 읽고 풀이를 준비합니다.</p>
+              </div>
             </div>
 
             <label className={`upload-dropzone${previewUrl ? ' has-preview' : ''}`}>
@@ -204,8 +253,9 @@ export default function HomePage() {
                 <img src={previewUrl} alt="업로드한 문제 미리보기" className="preview-image" />
               ) : (
                 <div className="upload-empty">
-                  <strong>문제 사진을 선택하거나 끌어다 놓아 보세요.</strong>
-                  <span>문제가 또렷하게 보이는 사진일수록 더 정확하게 읽을 수 있어요.</span>
+                  <div className="upload-icon">📷</div>
+                  <strong>문제 사진을 올려 주세요.</strong>
+                  <span>선명한 사진일수록 수식 인식이 더 정확해져요.</span>
                 </div>
               )}
             </label>
@@ -231,16 +281,53 @@ export default function HomePage() {
             <div className="sub-card">
               <div className="sub-card-head">
                 <h2>문제 읽기</h2>
+                <span className="sub-card-meta">OCR 결과</span>
               </div>
               <div className="recognized-problem">
-                <MarkdownViewer
-                  content={recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'}
-                />
+                <MarkdownViewer content={recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'} />
+              </div>
+            </div>
+          </article>
+
+          <article className="main-card side-panel-card">
+            <div className="card-head">
+              <div>
+                <h2>풀이 준비 현황</h2>
+                <p className="card-subtitle">문제를 읽고 관련 개념을 모아 보여드려요.</p>
               </div>
             </div>
 
+            <div className="status-stack">
+              <div className="status-card">
+                <div className="status-icon is-blue">1</div>
+                <div>
+                  <strong>사진 업로드</strong>
+                  <p>{selectedFile ? '사진이 업로드되었어요.' : '문제 사진을 올리면 여기서 확인해요.'}</p>
+                </div>
+              </div>
+              <div className="status-card">
+                <div className="status-icon is-emerald">2</div>
+                <div>
+                  <strong>문제 인식</strong>
+                  <p>{recognizedProblem ? '문제를 읽었어요. 바로 풀이를 시작할 수 있어요.' : '문제를 읽으면 수식과 문장을 정리해 드려요.'}</p>
+                </div>
+              </div>
+              <div className="status-card">
+                <div className="status-icon is-purple">3</div>
+                <div>
+                  <strong>통합 풀이</strong>
+                  <p>{solutionMarkdown ? '단계별 풀이가 준비되었어요.' : '관련 개념카드를 모아서 7개 섹션으로 풀이해 드려요.'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mini-robot-card">
+              <img src="/robot-mascot.png" alt="풀리 마스코트" className="mini-robot" />
+              <p>문제 안에 여러 과목 개념이 섞여 있어도 함께 찾아서 정리해 드릴게요.</p>
+            </div>
+
             {!!retrievedCards.length ? (
-              <div className="sub-card">
+              <div className="sub-card concept-results-card">
                 <div className="sub-card-head">
                   <h2>사용 개념카드</h2>
                   <span className="sub-card-meta">상위 {retrievedCards.length}개</span>
@@ -262,10 +349,15 @@ export default function HomePage() {
               </div>
             ) : null}
           </article>
+        </section>
 
+        <section className="solution-section">
           <article className="main-card solution-card">
             <div className="card-head">
-              <h2>통합 문제풀이</h2>
+              <div>
+                <h2>통합 문제풀이</h2>
+                <p className="card-subtitle">문제 읽기, 사용 개념, 단계별 풀이, 검산까지 한 번에 정리합니다.</p>
+              </div>
               <span className="card-badge">7개 섹션</span>
             </div>
 

@@ -215,7 +215,6 @@ export default function HomePage() {
         <section className="subject-tabs-wrap">
           <div className="section-heading">
             <h2>과목별 개념노트</h2>
-            <p>탭은 개념 탐색용이에요. 문제풀이는 어떤 탭을 눌러도 항상 전체 수학 범위에서 진행됩니다.</p>
           </div>
 
           <div className="subject-tabs">
@@ -242,9 +241,6 @@ export default function HomePage() {
               <span>{activeSubject.scope}</span>
             </div>
             <p>{activeSubject.description}</p>
-            <div className="inline-notice">
-              이 과목의 학생용 개념노트는 아직 연결 전입니다. 문제풀이는 과목 선택 없이 전체 수학 범위에서 가능합니다.
-            </div>
           </div>
         </section>
 

@@ -91,8 +91,52 @@ button {
   padding: 18px 0 36px;
 }
 
+.scope-banner {
+  margin-bottom: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at right top, rgba(67, 56, 202, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(238, 242, 255, 0.94) 100%);
+  box-shadow: var(--shadow);
+}
+
+.scope-label {
+  margin: 0 0 6px;
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.scope-banner h1 {
+  margin: 0;
+  font-size: 1.28rem;
+}
+
+.scope-subjects {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .subject-tabs-wrap {
   margin-bottom: 16px;
+}
+
+.section-heading {
+  margin-bottom: 12px;
+}
+
+.section-heading h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
 }
 
 .subject-tabs {
@@ -136,6 +180,36 @@ button {
   font-size: 0.76rem;
 }
 
+.subject-note-panel {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--shadow-soft);
+}
+
+.subject-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.subject-note-head strong {
+  font-size: 1rem;
+}
+
+.subject-note-head span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.subject-note-panel p {
+  margin: 10px 0 0;
+  line-height: 1.7;
+}
+
 .app-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
@@ -170,6 +244,12 @@ button {
 
 .card-head {
   margin-bottom: 16px;
+}
+
+.sub-card-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .card-head h1,
@@ -342,26 +422,17 @@ button {
   background: linear-gradient(180deg, #ffffff 0%, #f8faff 100%);
 }
 
-.concept-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.concept-card-top strong {
-  color: var(--primary);
-}
-
-.concept-card-top span {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.concept-card p {
-  margin: 0;
+.concept-card-title {
+  margin: 0 0 8px;
   font-weight: 700;
+  line-height: 1.6;
+}
+
+.concept-card-detail {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
 .solution-card {

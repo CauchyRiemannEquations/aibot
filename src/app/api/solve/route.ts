@@ -1,40 +1,34 @@
 import { NextResponse } from 'next/server';
 
-import { loadConceptCardsBySubject } from '@/lib/cards';
-import { buildSolverUserPrompt, loadSystemPromptBySubject, normalizeSolverSections, sectionsToMarkdown } from '@/lib/prompts';
+import { loadAllConceptCards } from '@/lib/cards';
+import {
+  buildSolverUserPromptForAllMath,
+  loadAllMathSystemPrompt,
+  normalizeSolverSections,
+  sectionsToMarkdown,
+} from '@/lib/prompts';
 import { generateSolution } from '@/lib/openrouter';
 import { retrieveRelevantCards } from '@/lib/rag';
-import { getSubjectById } from '@/lib/subjects';
-import type { SubjectId } from '@/lib/types';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const recognizedProblem = body?.recognizedProblem;
-    const subjectId = (typeof body?.subjectId === 'string' ? body.subjectId : 'calculus-1') as SubjectId;
-    const subject = getSubjectById(subjectId);
 
     if (typeof recognizedProblem !== 'string' || !recognizedProblem.trim()) {
       return NextResponse.json(
-        { error: '문제를 먼저 읽어 온 뒤 풀이를 시작해 주세요.' },
-        { status: 400 },
-      );
-    }
-
-    if (subject.status !== 'active') {
-      return NextResponse.json(
-        { error: `${subject.label} 과목은 아직 준비 중이에요. 지금은 미적분Ⅰ부터 사용할 수 있어요.` },
+        { error: '문제를 먼저 읽은 뒤에 풀이를 시작해 주세요.' },
         { status: 400 },
       );
     }
 
     const [cards, systemPrompt] = await Promise.all([
-      loadConceptCardsBySubject(subject.id),
-      loadSystemPromptBySubject(subject.id),
+      loadAllConceptCards(),
+      loadAllMathSystemPrompt(),
     ]);
 
-    const retrievedCards = retrieveRelevantCards(recognizedProblem, cards, 3);
-    const userPrompt = buildSolverUserPrompt(recognizedProblem, retrievedCards, subject);
+    const retrievedCards = retrieveRelevantCards(recognizedProblem, cards, 7);
+    const userPrompt = buildSolverUserPromptForAllMath(recognizedProblem, retrievedCards);
     const rawSolution = await generateSolution({
       systemPrompt,
       userPrompt,
@@ -44,16 +38,18 @@ export async function POST(request: Request) {
     const markdown = sectionsToMarkdown(sections);
 
     return NextResponse.json({
-      subject: {
-        id: subject.id,
-        label: subject.label,
+      solvingScope: {
+        label: '전체 고등학교 수학',
+        subjects: ['공통수학Ⅰ', '공통수학Ⅱ', '대수', '미적분Ⅰ', '미적분Ⅱ', '확률과 통계', '기하'],
       },
       recognizedProblem,
       retrievedCards: retrievedCards.map((card) => ({
         id: card.id,
-        title: card.title,
+        course: card.course,
         unit: card.unit,
+        title: card.title,
         score: card.score,
+        matchedTerms: card.matchedTerms,
       })),
       sections,
       markdown,
@@ -61,9 +57,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
 
-    return NextResponse.json(
-      { error: '풀이를 만드는 중에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.' },
-      { status: 500 },
-    );
+    const message =
+      error instanceof Error && error.message.includes('문제풀이용 개념카드')
+        ? error.message
+        : '풀이를 만드는 중에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.';
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

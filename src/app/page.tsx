@@ -7,20 +7,26 @@ import { SUBJECTS, getSubjectById } from '@/lib/subjects';
 
 type RetrievedCardSummary = {
   id: string;
-  title: string;
+  course: string;
   unit: string;
+  title: string;
   score: number;
+  matchedTerms?: string[];
 };
 
 type SolveResponse = {
-  subject?: {
-    id: string;
+  solvingScope?: {
     label: string;
+    subjects: string[];
   };
   recognizedProblem: string;
   retrievedCards: RetrievedCardSummary[];
   markdown: string;
 };
+
+const SOLVING_SCOPE_LABEL = '전체 고등학교 수학 통합 풀이';
+const SOLVING_SCOPE_SUBJECTS =
+  '공통수학Ⅰ · 공통수학Ⅱ · 대수 · 미적분Ⅰ · 미적분Ⅱ · 확률과 통계 · 기하';
 
 export default function HomePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -31,12 +37,11 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
   const [solving, setSolving] = useState(false);
-  const [activeSubjectId, setActiveSubjectId] = useState('calculus-1');
+  const [activeSubjectId, setActiveSubjectId] = useState('common-math-1');
 
   const activeSubject = getSubjectById(activeSubjectId);
-  const subjectReady = activeSubject.status === 'active';
-  const canRead = !!selectedFile && !reading && subjectReady;
-  const canSolve = !!recognizedProblem && !solving && subjectReady;
+  const canRead = !!selectedFile && !reading;
+  const canSolve = !!recognizedProblem.trim() && !solving;
 
   function resetOutputs() {
     setRecognizedProblem('');
@@ -56,19 +61,9 @@ export default function HomePage() {
     setPreviewUrl(file ? URL.createObjectURL(file) : '');
   }
 
-  function handleSelectSubject(subjectId: string) {
-    setActiveSubjectId(subjectId);
-    resetOutputs();
-  }
-
   async function handleReadProblem() {
     if (!selectedFile) {
       setError('문제 사진을 먼저 올려 주세요.');
-      return;
-    }
-
-    if (!subjectReady) {
-      setError(`${activeSubject.label} 과목은 아직 준비 중이에요. 지금은 미적분Ⅰ만 사용할 수 있어요.`);
       return;
     }
 
@@ -101,8 +96,8 @@ export default function HomePage() {
   }
 
   async function handleSolve() {
-    if (!subjectReady) {
-      setError(`${activeSubject.label} 과목은 아직 준비 중이에요. 지금은 미적분Ⅰ만 사용할 수 있어요.`);
+    if (!recognizedProblem.trim()) {
+      setError('문제를 먼저 읽어 주세요.');
       return;
     }
 
@@ -118,7 +113,6 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           recognizedProblem,
-          subjectId: activeSubject.id,
         }),
       });
 
@@ -149,7 +143,20 @@ export default function HomePage() {
       </header>
 
       <main className="app-page">
+        <section className="scope-banner">
+          <div>
+            <p className="scope-label">문제풀이 범위</p>
+            <h1>{SOLVING_SCOPE_LABEL}</h1>
+            <p className="scope-subjects">{SOLVING_SCOPE_SUBJECTS}</p>
+          </div>
+        </section>
+
         <section className="subject-tabs-wrap">
+          <div className="section-heading">
+            <h2>과목별 개념노트</h2>
+            <p>과목 탭은 개념노트 탐색용입니다. 문제풀이는 과목 선택 없이 전체 수학 범위에서 진행됩니다.</p>
+          </div>
+
           <div className="subject-tabs">
             {SUBJECTS.map((subject) => {
               const isActive = subject.id === activeSubjectId;
@@ -158,8 +165,8 @@ export default function HomePage() {
                 <button
                   key={subject.id}
                   type="button"
-                  className={`subject-tab${isActive ? ' is-active' : ''}${subject.status === 'planned' ? ' is-planned' : ''}`}
-                  onClick={() => handleSelectSubject(subject.id)}
+                  className={`subject-tab${isActive ? ' is-active' : ''}`}
+                  onClick={() => setActiveSubjectId(subject.id)}
                 >
                   <span className="subject-tab-label">{subject.shortLabel}</span>
                   <span className="subject-tab-note">{subject.note}</span>
@@ -167,13 +174,24 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          <div className="subject-note-panel">
+            <div className="subject-note-head">
+              <strong>{activeSubject.label}</strong>
+              <span>{activeSubject.scope}</span>
+            </div>
+            <p>{activeSubject.description}</p>
+            <div className="inline-notice">
+              이 과목의 학생용 개념노트는 아직 연결 전입니다. 문제풀이는 과목 선택 없이 전체 수학 범위에서 가능합니다.
+            </div>
+          </div>
         </section>
 
         <section className="app-grid">
           <article className="main-card upload-card">
             <div className="card-head">
-              <h1>문제 사진 올리기</h1>
-              <span className="card-badge">{activeSubject.label}</span>
+              <h2>문제 사진 올리기</h2>
+              <span className="card-badge">{SOLVING_SCOPE_LABEL}</span>
             </div>
 
             <label className={`upload-dropzone${previewUrl ? ' has-preview' : ''}`}>
@@ -186,17 +204,11 @@ export default function HomePage() {
                 <img src={previewUrl} alt="업로드한 문제 미리보기" className="preview-image" />
               ) : (
                 <div className="upload-empty">
-                  <strong>사진을 선택하거나 끌어다 놓으세요.</strong>
-                  <span>문제가 잘 보이게 찍은 사진이면 됩니다.</span>
+                  <strong>문제 사진을 선택하거나 끌어다 놓아 보세요.</strong>
+                  <span>문제가 또렷하게 보이는 사진일수록 더 정확하게 읽을 수 있어요.</span>
                 </div>
               )}
             </label>
-
-            {!subjectReady ? (
-              <div className="inline-notice">
-                {activeSubject.label} 과목은 아직 준비 중이에요. 지금은 미적분Ⅰ만 사용할 수 있어요.
-              </div>
-            ) : null}
 
             {previewUrl ? (
               <div className="upload-toolbar">
@@ -205,7 +217,7 @@ export default function HomePage() {
                 </button>
                 <div className="primary-actions">
                   <button type="button" className="ghost-button" onClick={handleReadProblem} disabled={!canRead}>
-                    {reading ? '읽는 중...' : '문제 읽기'}
+                    {reading ? '문제 읽는 중...' : '문제 읽기'}
                   </button>
                   <button type="button" className="primary-button" onClick={handleSolve} disabled={!canSolve}>
                     {solving ? '풀이 생성 중...' : '풀이 시작'}
@@ -231,15 +243,19 @@ export default function HomePage() {
               <div className="sub-card">
                 <div className="sub-card-head">
                   <h2>사용 개념카드</h2>
+                  <span className="sub-card-meta">상위 {retrievedCards.length}개</span>
                 </div>
                 <ul className="concept-card-list">
                   {retrievedCards.map((card) => (
                     <li key={card.id} className="concept-card">
-                      <div className="concept-card-top">
-                        <strong>{card.id}</strong>
-                        <span>{card.unit}</span>
-                      </div>
-                      <p>{card.title}</p>
+                      <p className="concept-card-title">
+                        [{card.course}] {card.id} {card.title}
+                      </p>
+                      <p className="concept-card-detail">단원: {card.unit}</p>
+                      <p className="concept-card-detail">관련도: {card.score}점</p>
+                      {card.matchedTerms?.length ? (
+                        <p className="concept-card-detail">매칭 근거: {card.matchedTerms.join(', ')}</p>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -249,7 +265,8 @@ export default function HomePage() {
 
           <article className="main-card solution-card">
             <div className="card-head">
-              <h2>풀이</h2>
+              <h2>통합 문제풀이</h2>
+              <span className="card-badge">7개 섹션</span>
             </div>
 
             {solutionMarkdown ? (

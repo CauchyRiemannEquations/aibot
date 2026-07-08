@@ -2,7 +2,7 @@ import { cache } from 'react';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
-import { SECTION_KEYS, SECTION_LABELS } from '@/lib/constants';
+import { SECTION_KEYS, SECTION_LABELS, STUDENT_VISIBLE_SECTION_KEYS } from '@/lib/constants';
 import type { SubjectDefinition } from '@/lib/subjects';
 import type { RetrievedCard, SolverSections, SubjectId } from '@/lib/types';
 
@@ -26,7 +26,9 @@ function withSharedXmlRules(basePrompt: string): string {
 - 태그 밖의 문장은 출력하지 않는다.
 - 각 태그 안에서는 학생이 읽기 쉬운 자연스러운 한국어로 설명한다.
 - 수식은 Markdown 본문 안에서 LaTeX 형식($...$, $$...$$)으로 작성한다.
-- [사용 개념]에는 개념카드 ID, 과목명, 단원명을 반드시 포함한다.
+- 제공된 개념카드는 내부 참고용으로만 사용한다.
+- 학생에게는 개념카드 ID, RAG 검색 결과, 과목명, 단원명, 관련도 점수를 직접 노출하지 않는다.
+- 풀이 전략은 학생이 따라 할 수 있는 행동 중심으로 설명한다.
 
 <problemReading>...</problemReading>
 <usedConcepts>...</usedConcepts>
@@ -88,7 +90,9 @@ ${problemText}
 [검색된 개념카드]
 ${cardsText}
 
-위 개념카드를 우선 참고해서 풀이를 작성하세요.`;
+위 개념카드는 내부 참고용이다.
+학생 답변에는 개념카드 ID나 검색 결과를 드러내지 말고,
+풀이 전략과 단계별 풀이를 학생이 따라 할 수 있는 행동 중심으로 작성하세요.`;
 }
 
 export function buildSolverUserPromptForAllMath(problemText: string, cards: RetrievedCard[]): string {
@@ -119,8 +123,10 @@ ${cardsText}
 
 [풀이 요청]
 - 여러 과목 개념이 함께 쓰일 수 있음을 전제로 풀이하세요.
-- 실제로 사용한 카드만 [사용 개념]에 정리하세요.
-- [사용 개념]에는 반드시 "과목명 / 단원명 / 카드 ID / 개념명" 형식이 드러나게 쓰세요.
+- 개념카드는 내부 참고용으로만 사용하세요.
+- 학생에게 개념카드 ID, 과목명, 단원명, 관련도 점수, RAG 검색 결과를 직접 노출하지 마세요.
+- [사용 개념] 태그는 내부 참고를 위해 유지해도 되지만, 카드 ID 중심이 아니라 짧은 내부 메모 수준으로 최소한만 적으세요.
+- 풀이 전략은 "먼저 식을 정리한다", "대입했을 때 어떤 꼴인지 확인한다"처럼 학생이 따라 할 수 있는 행동 중심으로 설명하세요.
 - OCR이 애매한 부분이 있으면 [문제 읽기]에서 먼저 분명히 적어 주세요.`;
 }
 
@@ -142,5 +148,9 @@ export function normalizeSolverSections(source: string): SolverSections {
 }
 
 export function sectionsToMarkdown(sections: SolverSections): string {
-  return SECTION_KEYS.map((key) => `## [${SECTION_LABELS[key]}]\n\n${sections[key]}`).join('\n\n');
+  return STUDENT_VISIBLE_SECTION_KEYS.map(
+    (key) => `## [${SECTION_LABELS[key]}]\n\n${sections[key]}`,
+  ).join('\n\n');
 }
+
+export { SECTION_KEYS };

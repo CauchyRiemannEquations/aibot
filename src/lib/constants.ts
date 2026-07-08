@@ -11,3 +11,12 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
 };
 
 export const SECTION_KEYS = Object.keys(SECTION_LABELS) as SectionKey[];
+
+export const STUDENT_VISIBLE_SECTION_KEYS: Exclude<SectionKey, 'usedConcepts'>[] = [
+  'problemReading',
+  'strategy',
+  'stepByStep',
+  'answer',
+  'check',
+  'similarTip',
+];

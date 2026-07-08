@@ -3,7 +3,9 @@
 import { useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
+import { SolutionStep } from '@/components/solution-step';
 import { SUBJECTS, getSubjectById } from '@/lib/subjects';
+import type { SolverSections } from '@/lib/types';
 
 type RetrievedCardSummary = {
   id: string;
@@ -20,7 +22,8 @@ type SolveResponse = {
     subjects: string[];
   };
   recognizedProblem: string;
-  retrievedCards: RetrievedCardSummary[];
+  retrievedCards?: RetrievedCardSummary[];
+  sections: SolverSections;
   markdown: string;
 };
 
@@ -35,10 +38,21 @@ const SOLVING_SCOPE_SUBJECTS = [
   '기하',
 ];
 
-const FLOW_STEPS = [
-  '1. 사진 업로드',
-  '2. 문제 인식',
-  '3. 단계별 풀이',
+const FLOW_STEPS = ['1. 사진 업로드', '2. 문제 인식', '3. 단계별 풀이'];
+const showDebugConcepts = process.env.NEXT_PUBLIC_SHOW_DEBUG_CONCEPTS === 'true';
+
+const solutionStepConfigs: Array<{
+  key: keyof Omit<SolverSections, 'usedConcepts'>;
+  title: string;
+  defaultOpen: boolean;
+  tone?: 'default' | 'answer' | 'tip';
+}> = [
+  { key: 'problemReading', title: '문제 읽기', defaultOpen: false },
+  { key: 'strategy', title: '풀이 전략', defaultOpen: true },
+  { key: 'stepByStep', title: '단계별 풀이', defaultOpen: true },
+  { key: 'answer', title: '정답 확인', defaultOpen: true, tone: 'answer' },
+  { key: 'check', title: '검산하기', defaultOpen: false },
+  { key: 'similarTip', title: '비슷한 문제는 이렇게 풀어요', defaultOpen: false, tone: 'tip' },
 ];
 
 export default function HomePage() {
@@ -46,7 +60,7 @@ export default function HomePage() {
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [recognizedProblem, setRecognizedProblem] = useState('');
   const [retrievedCards, setRetrievedCards] = useState<RetrievedCardSummary[]>([]);
-  const [solutionMarkdown, setSolutionMarkdown] = useState('');
+  const [solutionSections, setSolutionSections] = useState<SolverSections | null>(null);
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
   const [solving, setSolving] = useState(false);
@@ -55,11 +69,12 @@ export default function HomePage() {
   const activeSubject = getSubjectById(activeSubjectId);
   const canRead = !!selectedFile && !reading;
   const canSolve = !!recognizedProblem.trim() && !solving;
+  const hasSolution = solutionSections !== null;
 
   function resetOutputs() {
     setRecognizedProblem('');
     setRetrievedCards([]);
-    setSolutionMarkdown('');
+    setSolutionSections(null);
     setError('');
   }
 
@@ -82,7 +97,7 @@ export default function HomePage() {
 
     setReading(true);
     setError('');
-    setSolutionMarkdown('');
+    setSolutionSections(null);
     setRetrievedCards([]);
 
     try {
@@ -116,7 +131,6 @@ export default function HomePage() {
 
     setSolving(true);
     setError('');
-    setSolutionMarkdown('');
 
     try {
       const response = await fetch('/api/solve', {
@@ -135,8 +149,8 @@ export default function HomePage() {
         throw new Error(data.error || '풀이를 만들지 못했어요.');
       }
 
-      setRetrievedCards(data.retrievedCards);
-      setSolutionMarkdown(data.markdown);
+      setRetrievedCards(data.retrievedCards ?? []);
+      setSolutionSections(data.sections);
     } catch (err) {
       setError(err instanceof Error ? err.message : '풀이를 만들지 못했어요.');
     } finally {
@@ -150,7 +164,7 @@ export default function HomePage() {
         <div className="app-topbar-inner">
           <div className="brand-lockup">
             <div className="brand-logo-wrap">
-              <img src="/robot-mascot.png" alt="풀이 로봇 마스코트" className="brand-logo" />
+              <img src="/robot-mascot.png" alt="풀리 로봇 마스코트" className="brand-logo" />
             </div>
             <div className="brand-copy">
               <span className="brand-name">풀리</span>
@@ -192,7 +206,7 @@ export default function HomePage() {
 
           <aside className="hero-assistant-card">
             <div className="hero-assistant-bubble">
-              사진 업로드부터 사용 개념 정리까지 한 화면에서 도와드릴게요.
+              사진 업로드부터 풀이 전략, 정답 확인까지 한 화면에서 도와드릴게요.
             </div>
             <img src="/robot-mascot.png" alt="수학 도우미 로봇" className="hero-robot" />
           </aside>
@@ -234,23 +248,27 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="app-grid">
-          <article className="main-card upload-card">
+        <section className={`app-grid${hasSolution ? ' has-solution' : ''}`}>
+          <article className={`main-card upload-card${hasSolution ? ' is-compact' : ''}`}>
             <div className="card-head">
               <div>
-                <h2>문제 사진 올리기</h2>
-                <p className="card-subtitle">PNG, JPG 파일을 올리면 문제를 읽고 풀이를 준비합니다.</p>
+                <h2>{hasSolution ? '새 문제 준비' : '문제 사진 올리기'}</h2>
+                <p className="card-subtitle">
+                  {hasSolution
+                    ? '다른 문제를 풀고 싶다면 새 사진을 올려 주세요.'
+                    : 'PNG, JPG 파일을 올리면 문제를 읽고 풀이를 준비합니다.'}
+                </p>
               </div>
             </div>
 
-            <label className={`upload-dropzone${previewUrl ? ' has-preview' : ''}`}>
+            <label className={`upload-dropzone${previewUrl ? ' has-preview' : ''}${hasSolution ? ' is-compact' : ''}`}>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
               />
               {previewUrl ? (
-                <img src={previewUrl} alt="업로드한 문제 미리보기" className="preview-image" />
+                <img src={previewUrl} alt="업로드한 문제 미리보기" className={`preview-image${hasSolution ? ' is-compact' : ''}`} />
               ) : (
                 <div className="upload-empty">
                   <div className="upload-icon">📷</div>
@@ -270,7 +288,7 @@ export default function HomePage() {
                     {reading ? '문제 읽는 중...' : '문제 읽기'}
                   </button>
                   <button type="button" className="primary-button" onClick={handleSolve} disabled={!canSolve}>
-                    {solving ? '풀이 생성 중...' : '풀이 시작'}
+                    {solving ? '풀이 생성 중...' : hasSolution ? '새 문제 풀기' : '풀이 시작'}
                   </button>
                 </div>
               </div>
@@ -278,7 +296,7 @@ export default function HomePage() {
 
             {error ? <div className="error-banner">{error}</div> : null}
 
-            <div className="sub-card">
+            <div className="sub-card recognized-card">
               <div className="sub-card-head">
                 <h2>문제 읽기</h2>
                 <span className="sub-card-meta">OCR 결과</span>
@@ -287,50 +305,12 @@ export default function HomePage() {
                 <MarkdownViewer content={recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'} />
               </div>
             </div>
-          </article>
 
-          <article className="main-card side-panel-card">
-            <div className="card-head">
-              <div>
-                <h2>풀이 준비 현황</h2>
-                <p className="card-subtitle">문제를 읽고 관련 개념을 모아 보여드려요.</p>
-              </div>
-            </div>
-
-            <div className="status-stack">
-              <div className="status-card">
-                <div className="status-icon is-blue">1</div>
-                <div>
-                  <strong>사진 업로드</strong>
-                  <p>{selectedFile ? '사진이 업로드되었어요.' : '문제 사진을 올리면 여기서 확인해요.'}</p>
-                </div>
-              </div>
-              <div className="status-card">
-                <div className="status-icon is-emerald">2</div>
-                <div>
-                  <strong>문제 인식</strong>
-                  <p>{recognizedProblem ? '문제를 읽었어요. 바로 풀이를 시작할 수 있어요.' : '문제를 읽으면 수식과 문장을 정리해 드려요.'}</p>
-                </div>
-              </div>
-              <div className="status-card">
-                <div className="status-icon is-purple">3</div>
-                <div>
-                  <strong>통합 풀이</strong>
-                  <p>{solutionMarkdown ? '단계별 풀이가 준비되었어요.' : '관련 개념카드를 모아서 7개 섹션으로 풀이해 드려요.'}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mini-robot-card">
-              <img src="/robot-mascot.png" alt="풀리 마스코트" className="mini-robot" />
-              <p>문제 안에 여러 과목 개념이 섞여 있어도 함께 찾아서 정리해 드릴게요.</p>
-            </div>
-
-            {!!retrievedCards.length ? (
+            {showDebugConcepts && retrievedCards.length ? (
               <div className="sub-card concept-results-card">
                 <div className="sub-card-head">
-                  <h2>사용 개념카드</h2>
-                  <span className="sub-card-meta">상위 {retrievedCards.length}개</span>
+                  <h2>디버그 개념카드</h2>
+                  <span className="sub-card-meta">개발용</span>
                 </div>
                 <ul className="concept-card-list">
                   {retrievedCards.map((card) => (
@@ -349,20 +329,29 @@ export default function HomePage() {
               </div>
             ) : null}
           </article>
-        </section>
 
-        <section className="solution-section">
           <article className="main-card solution-card">
             <div className="card-head">
               <div>
-                <h2>통합 문제풀이</h2>
-                <p className="card-subtitle">문제 읽기, 사용 개념, 단계별 풀이, 검산까지 한 번에 정리합니다.</p>
+                <h2>풀리의 풀이</h2>
+                <p className="card-subtitle">풀리가 문제를 읽고, 풀이 과정을 차근차근 정리했어요.</p>
               </div>
-              <span className="card-badge">7개 섹션</span>
+              <span className="card-badge">6개 섹션</span>
             </div>
 
-            {solutionMarkdown ? (
-              <MarkdownViewer content={solutionMarkdown} />
+            {solutionSections ? (
+              <div className="solution-report">
+                {solutionStepConfigs.map((step, index) => (
+                  <SolutionStep
+                    key={step.key}
+                    number={index + 1}
+                    title={step.title}
+                    content={solutionSections[step.key]}
+                    defaultOpen={step.defaultOpen}
+                    tone={step.tone}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="solution-empty">
                 <div className="solution-empty-line is-strong" />

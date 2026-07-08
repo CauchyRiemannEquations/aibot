@@ -1,0 +1,8 @@
+{"id": "TC-CM1-POLY-01", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$(2x^2-x+1)+(x^2+3x-4)$", "expected_cards": ["CM1-POLY-01"], "checkpoints": ["다항식의 연산", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-POLY-02", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$(a-b)^2=a^2-2ab+b^2$", "expected_cards": ["CM1-POLY-02"], "checkpoints": ["곱셈공식", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-POLY-03", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$x^2-5x+6=(x-2)(x-3)$", "expected_cards": ["CM1-POLY-03"], "checkpoints": ["인수분해", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-POLY-04", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$ax+b=2x+3$가 항등식이면 $a=2,b=3$", "expected_cards": ["CM1-POLY-04"], "checkpoints": ["항등식", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-POLY-05", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$f(x)$를 $x-2$로 나눈 나머지는 $f(2)$", "expected_cards": ["CM1-POLY-05"], "checkpoints": ["나머지정리", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-POLY-06", "subject_id": "common-math-1", "unit": "다항식", "image_needed": true, "problem_text": "$f(3)=0$이면 $x-3$은 인수", "expected_cards": ["CM1-POLY-06"], "checkpoints": ["인수정리", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-EQ-01", "subject_id": "common-math-1", "unit": "방정식과 부등식", "image_needed": true, "problem_text": "$(2+3i)+(1-5i)$", "expected_cards": ["CM1-EQ-01"], "checkpoints": ["복소수의 뜻과 연산", "단계별 풀이", "검산"]}
+{"id": "TC-CM1-EQ-02", "subject_id": "common-math-1", "unit": "방정식과 부등식", "image_needed": true, "problem_text": "$x^2-5x+6=0$", "expected_cards": ["CM1-EQ-02"], "checkpoints": ["이차방정식의 풀이", "단계별 풀이", "검산"]}

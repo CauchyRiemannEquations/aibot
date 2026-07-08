@@ -3,16 +3,17 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 
 import { SECTION_KEYS, SECTION_LABELS } from '@/lib/constants';
-import type { RetrievedCard, SolverSections } from '@/lib/types';
 import type { SubjectDefinition } from '@/lib/subjects';
-import type { SubjectId } from '@/lib/types';
+import type { RetrievedCard, SolverSections, SubjectId } from '@/lib/types';
 
 const SYSTEM_PROMPT_FILE_BY_SUBJECT: Record<SubjectId, string> = {
+  'common-math-1': 'common_math1_solver_system_prompt_v0_1.md',
+  'common-math-2': 'common_math2_solver_system_prompt_v0_1.md',
   'calculus-1': 'mijeokbun1_solver_system_prompt_v0_1.md',
   algebra: 'algebra_solver_system_prompt_v0_1.md',
-  'calculus-2': 'mijeokbun1_solver_system_prompt_v0_1.md',
-  geometry: 'mijeokbun1_solver_system_prompt_v0_1.md',
-  probability: 'mijeokbun1_solver_system_prompt_v0_1.md',
+  'calculus-2': 'calculus2_solver_system_prompt_v0_1.md',
+  geometry: 'geometry_solver_system_prompt_v0_1.md',
+  probability: 'probability_solver_system_prompt_v0_1.md',
 };
 
 export const loadSystemPromptBySubject = cache(async (subjectId: SubjectId): Promise<string> => {

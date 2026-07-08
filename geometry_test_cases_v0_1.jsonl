@@ -1,0 +1,8 @@
+{"id": "TC-GEO-CONIC-01", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "초점 (p,0), 준선 x=-p인 포물선", "expected_cards": ["GEO-CONIC-01"], "checkpoints": ["포물선의 정의", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-02", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "$y^2=4px$, $x^2=4py$", "expected_cards": ["GEO-CONIC-02"], "checkpoints": ["포물선의 표준형", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-03", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "$\\frac{x^2}{a^2}+\\frac{y^2}{b^2}=1$", "expected_cards": ["GEO-CONIC-03"], "checkpoints": ["타원의 정의", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-04", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "$c^2=a^2-b^2$", "expected_cards": ["GEO-CONIC-04"], "checkpoints": ["타원의 표준형", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-05", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "$\\frac{x^2}{a^2}-\\frac{y^2}{b^2}=1$", "expected_cards": ["GEO-CONIC-05"], "checkpoints": ["쌍곡선의 정의", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-06", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "$y=\\pm\\frac{b}{a}x$", "expected_cards": ["GEO-CONIC-06"], "checkpoints": ["쌍곡선의 표준형과 점근선", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-CONIC-07", "subject_id": "geometry", "unit": "이차곡선", "image_needed": true, "problem_text": "포물선과 직선이 접할 조건", "expected_cards": ["GEO-CONIC-07"], "checkpoints": ["이차곡선의 접선", "단계별 풀이", "검산"]}
+{"id": "TC-GEO-VEC-01", "subject_id": "geometry", "unit": "평면벡터", "image_needed": true, "problem_text": "$\\vec{AB}=B-A$", "expected_cards": ["GEO-VEC-01"], "checkpoints": ["벡터의 뜻과 연산", "단계별 풀이", "검산"]}

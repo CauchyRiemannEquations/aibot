@@ -2,7 +2,16 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const root = process.cwd();
+
 const DATASET_BY_SUBJECT = {
+  'common-math-1': {
+    cardsPath: path.join(root, 'common_math1_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'common_math1_test_cases_v0_1.jsonl'),
+  },
+  'common-math-2': {
+    cardsPath: path.join(root, 'common_math2_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'common_math2_test_cases_v0_1.jsonl'),
+  },
   'calculus-1': {
     cardsPath: path.join(root, 'mijeokbun1_ai_rag_cards_v0_1.jsonl'),
     testsPath: path.join(root, 'mijeokbun1_test_cases_v0_1.jsonl'),
@@ -11,10 +20,33 @@ const DATASET_BY_SUBJECT = {
     cardsPath: path.join(root, 'algebra_ai_rag_cards_v0_1.jsonl'),
     testsPath: path.join(root, 'algebra_test_cases_v0_1.jsonl'),
   },
+  'calculus-2': {
+    cardsPath: path.join(root, 'calculus2_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'calculus2_test_cases_v0_1.jsonl'),
+  },
+  geometry: {
+    cardsPath: path.join(root, 'geometry_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'geometry_test_cases_v0_1.jsonl'),
+  },
+  probability: {
+    cardsPath: path.join(root, 'probability_ai_rag_cards_v0_1.jsonl'),
+    testsPath: path.join(root, 'probability_test_cases_v0_1.jsonl'),
+  },
 };
 
 function normalizeText(value) {
   return value.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ');
+}
+
+function normalizeFormula(value) {
+  return value
+    .toLowerCase()
+    .replace(/\$\$/g, ' ')
+    .replace(/\$/g, ' ')
+    .replace(/\\,/g, '')
+    .replace(/\\left|\\right/g, '')
+    .replace(/\s+/g, '')
+    .trim();
 }
 
 function tokenize(value) {
@@ -22,6 +54,23 @@ function tokenize(value) {
     .split(/\s+/)
     .map((token) => token.trim())
     .filter((token) => token.length >= 2);
+}
+
+function looksMathematical(value) {
+  return /[=<>≤≥^_{}\\]|lim|sin|cos|tan|log|ln|sqrt|frac|int|sum|f\(x\)/i.test(value);
+}
+
+function extractFormulaCandidates(value) {
+  const inlineMath = [...value.matchAll(/\$\$?([\s\S]*?)\$\$?/g)]
+    .map((match) => normalizeFormula(match[1] ?? ''))
+    .filter((candidate) => candidate.length >= 4);
+
+  const fallbackFormula = normalizeFormula(value);
+  if (looksMathematical(value) && fallbackFormula.length >= 6 && fallbackFormula.length <= 120) {
+    inlineMath.push(fallbackFormula);
+  }
+
+  return [...new Set(inlineMath)];
 }
 
 function countOccurrences(haystack, needle) {
@@ -36,9 +85,12 @@ function countOccurrences(haystack, needle) {
 function scoreCard(problemText, card) {
   const normalizedProblem = normalizeText(problemText);
   const tokens = new Set(tokenize(problemText));
+  const problemFormulaCandidates = extractFormulaCandidates(problemText);
   const cardSearchText = normalizeText(
     [card.title, card.unit, card.retrieval_text, ...(card.keywords ?? [])].join(' '),
   );
+  const cardFormulaText = [card.representative_example, card.core_principle, card.retrieval_text].join(' ');
+  const cardFormulaCandidates = extractFormulaCandidates(cardFormulaText);
 
   let score = 0;
 
@@ -64,26 +116,53 @@ function scoreCard(problemText, card) {
     }
   }
 
+  for (const problemFormula of problemFormulaCandidates) {
+    for (const cardFormula of cardFormulaCandidates) {
+      if (!cardFormula) {
+        continue;
+      }
+
+      if (problemFormula === cardFormula) {
+        score += 20;
+        continue;
+      }
+
+      const minLength = Math.min(problemFormula.length, cardFormula.length);
+      if (
+        minLength >= 8 &&
+        (problemFormula.includes(cardFormula) || cardFormula.includes(problemFormula))
+      ) {
+        score += 12;
+      }
+    }
+  }
+
   const looksLikePiecewise =
-    /x\s*[<>≥≤]/i.test(problemText) || /(x<|x>|x<=|x>=)/i.test(problemText);
-  const mentionsContinuity = normalizedProblem.includes('연속');
-  const mentionsParameters = /\b[a-z]\b/.test(problemText);
+    /x\s*(<|>|<=|>=|≤|≥)\s*[-\d\w]+/i.test(problemText) ||
+    (problemText.includes('{') && /(x<|x>|x<=|x>=|x≤|x≥)/i.test(problemText));
+  const mentionsContinuity = /연속|continuity/i.test(problemText);
+  const mentionsFunctionValue = /f\s*\(\s*x\s*\)|f\s*\(\s*1\s*\)/i.test(problemText);
+  const mentionsParameters = /\b[a-z]\b/i.test(problemText);
 
-  if (looksLikePiecewise && cardSearchText.includes('조각함수')) {
+  const cardHasPiecewisePattern =
+    /x\s*(<|>|<=|>=|≤|≥)\s*[-\d\w]+/i.test(cardFormulaText) ||
+    (cardFormulaText.includes('{') && /(x<|x>|x<=|x>=|x≤|x≥)/i.test(cardFormulaText));
+  const cardMentionsContinuity = /연속|continuity/i.test(
+    [card.title, card.retrieval_text, ...(card.keywords ?? [])].join(' '),
+  );
+  const cardMentionsParameters = /미정계수|parameter/i.test(
+    [card.title, card.retrieval_text, ...(card.keywords ?? [])].join(' '),
+  );
+
+  if (looksLikePiecewise && cardHasPiecewisePattern) {
     score += 10;
   }
 
-  if (mentionsContinuity && cardSearchText.includes('연속')) {
+  if ((mentionsContinuity || mentionsFunctionValue) && cardMentionsContinuity) {
     score += 10;
   }
 
-  if (
-    mentionsParameters &&
-    mentionsContinuity &&
-    looksLikePiecewise &&
-    cardSearchText.includes('미정계수') &&
-    cardSearchText.includes('연속')
-  ) {
+  if (looksLikePiecewise && mentionsParameters && cardHasPiecewisePattern && cardMentionsParameters) {
     score += 12;
   }
 
@@ -115,6 +194,10 @@ for (const subjectId of subjectsToRun) {
     .filter(Boolean)
     .map((line) => JSON.parse(line));
 
+  const duplicateIds = cards
+    .map((card) => card.id)
+    .filter((id, index, array) => array.indexOf(id) !== index);
+
   const tests = (await fs.readFile(dataset.testsPath, 'utf8'))
     .split(/\r?\n/)
     .filter(Boolean)
@@ -133,6 +216,7 @@ for (const subjectId of subjectsToRun) {
   });
 
   console.log(`\n[${subjectId}]`);
+  console.log(`Duplicate IDs: ${duplicateIds.length ? duplicateIds.join(', ') : 'none'}`);
 
   for (const result of results) {
     console.log(`${result.id}: ${result.hit ? 'PASS' : 'MISS'}`);
@@ -143,7 +227,7 @@ for (const subjectId of subjectsToRun) {
   const passCount = results.filter((result) => result.hit).length;
   console.log(`Summary: ${passCount}/${results.length} test cases matched at least one expected card.`);
 
-  if (passCount !== results.length) {
+  if (duplicateIds.length || passCount !== results.length) {
     process.exitCode = 1;
   }
 }

@@ -1,0 +1,8 @@
+{"id": "TC-PS-COUNT-01", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "A 또는 B 중 하나를 고르는 경우와 A를 고른 뒤 B를 고르는 경우 비교", "expected_cards": ["PS-COUNT-01"], "checkpoints": ["합의 법칙과 곱의 법칙", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-02", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "$5P_3$", "expected_cards": ["PS-COUNT-02"], "checkpoints": ["순열", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-03", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "0~9 숫자로 세 자리 비밀번호 만들기", "expected_cards": ["PS-COUNT-03"], "checkpoints": ["중복순열", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-04", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "MISSISSIPPI의 배열 수", "expected_cards": ["PS-COUNT-04"], "checkpoints": ["같은 것이 있는 순열", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-05", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "서로 다른 6명을 원탁에 앉히는 경우", "expected_cards": ["PS-COUNT-05"], "checkpoints": ["원순열", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-06", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "$\\binom{7}{3}$", "expected_cards": ["PS-COUNT-06"], "checkpoints": ["조합", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-07", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "사탕 4종류 중 6개 고르기", "expected_cards": ["PS-COUNT-07"], "checkpoints": ["중복조합", "단계별 풀이", "검산"]}
+{"id": "TC-PS-COUNT-08", "subject_id": "probability", "unit": "경우의 수", "image_needed": true, "problem_text": "$(x+2)^5$에서 $x^3$의 계수", "expected_cards": ["PS-COUNT-08"], "checkpoints": ["이항정리", "단계별 풀이", "검산"]}

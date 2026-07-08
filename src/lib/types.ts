@@ -36,6 +36,8 @@ export type SectionKey =
 export type SolverSections = Record<SectionKey, string>;
 
 export type SubjectId =
+  | 'common-math-1'
+  | 'common-math-2'
   | 'calculus-1'
   | 'algebra'
   | 'calculus-2'

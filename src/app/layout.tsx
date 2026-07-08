@@ -4,8 +4,7 @@ import './globals.css';
 import 'katex/dist/katex.min.css';
 
 export const metadata: Metadata = {
-  title: '미적분Ⅰ 사진 문제풀이봇',
-  description: '문제 사진을 올리면 단계별 풀이를 제공하는 MVP입니다.',
+  title: 'AI 수학문제 풀이 봇 풀리',
 };
 
 export default function RootLayout({

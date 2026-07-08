@@ -21,7 +21,7 @@ export function SolutionStep({
         <span className="solution-step-number">{number}</span>
         <span className="solution-step-title">{title}</span>
         <span className="solution-step-chevron" aria-hidden="true">
-          ▾
+          v
         </span>
       </summary>
       <div className="solution-step-body">

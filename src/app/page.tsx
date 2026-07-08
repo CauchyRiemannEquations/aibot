@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
 import { SolutionStep } from '@/components/solution-step';
@@ -17,28 +17,12 @@ type RetrievedCardSummary = {
 };
 
 type SolveResponse = {
-  solvingScope?: {
-    label: string;
-    subjects: string[];
-  };
   recognizedProblem: string;
   retrievedCards?: RetrievedCardSummary[];
   sections: SolverSections;
   markdown: string;
 };
 
-const SOLVING_SCOPE_LABEL = '전체 고등학교 수학 통합 풀이';
-const SOLVING_SCOPE_SUBJECTS = [
-  '공통수학Ⅰ',
-  '공통수학Ⅱ',
-  '대수',
-  '미적분Ⅰ',
-  '미적분Ⅱ',
-  '확률과 통계',
-  '기하',
-];
-
-const FLOW_STEPS = ['1. 사진 업로드', '2. 문제 인식', '3. 단계별 풀이'];
 const showDebugConcepts = process.env.NEXT_PUBLIC_SHOW_DEBUG_CONCEPTS === 'true';
 
 const solutionStepConfigs: Array<{
@@ -47,15 +31,16 @@ const solutionStepConfigs: Array<{
   defaultOpen: boolean;
   tone?: 'default' | 'answer' | 'tip';
 }> = [
-  { key: 'problemReading', title: '문제 읽기', defaultOpen: false },
-  { key: 'strategy', title: '풀이 전략', defaultOpen: true },
-  { key: 'stepByStep', title: '단계별 풀이', defaultOpen: true },
-  { key: 'answer', title: '정답 확인', defaultOpen: true, tone: 'answer' },
-  { key: 'check', title: '검산하기', defaultOpen: false },
-  { key: 'similarTip', title: '비슷한 문제는 이렇게 풀어요', defaultOpen: false, tone: 'tip' },
+  { key: 'problemReading', title: '\uBB38\uC81C \uC77D\uAE30', defaultOpen: false },
+  { key: 'strategy', title: '\uD480\uC774 \uC804\uB7B5', defaultOpen: true },
+  { key: 'stepByStep', title: '\uB2E8\uACC4\uBCC4 \uD480\uC774', defaultOpen: true },
+  { key: 'answer', title: '\uC815\uB2F5 \uD655\uC778', defaultOpen: true, tone: 'answer' },
+  { key: 'check', title: '\uAC80\uC0B0\uD558\uAE30', defaultOpen: false },
+  { key: 'similarTip', title: '\uBE44\uC2B7\uD55C \uBB38\uC81C\uB294 \uC774\uB807\uAC8C \uD480\uC5B4\uC694', defaultOpen: false, tone: 'tip' },
 ];
 
 export default function HomePage() {
+  // Keep the page state in one place so later TSX edits stay easy.
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [recognizedProblem, setRecognizedProblem] = useState('');
@@ -71,6 +56,14 @@ export default function HomePage() {
   const canSolve = !!recognizedProblem.trim() && !solving;
   const hasSolution = solutionSections !== null;
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   function resetOutputs() {
     setRecognizedProblem('');
     setRetrievedCards([]);
@@ -79,19 +72,18 @@ export default function HomePage() {
   }
 
   function handleFileChange(file: File | null) {
-    setSelectedFile(file);
-    resetOutputs();
-
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
     }
 
+    setSelectedFile(file);
     setPreviewUrl(file ? URL.createObjectURL(file) : '');
+    resetOutputs();
   }
 
   async function handleReadProblem() {
     if (!selectedFile) {
-      setError('문제 사진을 먼저 올려 주세요.');
+      setError('\uBB38\uC81C \uC0AC\uC9C4\uC744 \uBA3C\uC800 \uC62C\uB824 \uC8FC\uC138\uC694.');
       return;
     }
 
@@ -112,12 +104,12 @@ export default function HomePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || '문제를 읽지 못했어요.');
+        throw new Error(data.error || '\uBB38\uC81C\uB97C \uC77D\uC9C0 \uBABB\uD588\uC5B4\uC694.');
       }
 
       setRecognizedProblem(data.recognizedProblem);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '문제를 읽지 못했어요.');
+      setError(err instanceof Error ? err.message : '\uBB38\uC81C\uB97C \uC77D\uC9C0 \uBABB\uD588\uC5B4\uC694.');
     } finally {
       setReading(false);
     }
@@ -125,7 +117,7 @@ export default function HomePage() {
 
   async function handleSolve() {
     if (!recognizedProblem.trim()) {
-      setError('문제를 먼저 읽어 주세요.');
+      setError('\uBB38\uC81C\uB97C \uBA3C\uC800 \uC77D\uC5B4 \uC8FC\uC138\uC694.');
       return;
     }
 
@@ -146,13 +138,13 @@ export default function HomePage() {
       const data = (await response.json()) as SolveResponse & { error?: string };
 
       if (!response.ok) {
-        throw new Error(data.error || '풀이를 만들지 못했어요.');
+        throw new Error(data.error || '\uD480\uC774\uB97C \uB9CC\uB4E4\uC9C0 \uBABB\uD588\uC5B4\uC694.');
       }
 
       setRetrievedCards(data.retrievedCards ?? []);
       setSolutionSections(data.sections);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '풀이를 만들지 못했어요.');
+      setError(err instanceof Error ? err.message : '\uD480\uC774\uB97C \uB9CC\uB4E4\uC9C0 \uBABB\uD588\uC5B4\uC694.');
     } finally {
       setSolving(false);
     }
@@ -164,60 +156,17 @@ export default function HomePage() {
         <div className="app-topbar-inner">
           <div className="brand-lockup">
             <div className="brand-logo-wrap">
-              <img src="/robot-mascot.png" alt="풀리 로봇 마스코트" className="brand-logo" />
+              <img src="/robot-mascot.png" alt="\uD480\uB9AC \uB85C\uBD07 \uB9C8\uC2A4\uCF54\uD2B8" className="brand-logo" />
             </div>
-            <div className="brand-copy">
-              <span className="brand-name">풀리</span>
-            </div>
+            <span className="brand-name">\uD480\uB9AC</span>
           </div>
-          <button type="button" className="hero-launch-button">
-            시작하기
-          </button>
         </div>
       </header>
 
-      <main className="app-page">
-        <section className="flow-tabs" aria-label="문제풀이 단계">
-          {FLOW_STEPS.map((step, index) => (
-            <div key={step} className={`flow-tab${index === 0 ? ' is-active' : ''}`}>
-              {step}
-            </div>
-          ))}
-        </section>
-
-        <section className="hero-panel">
-          <div className="hero-copy">
-            <p className="hero-eyebrow">AI 수학 풀이 도우미</p>
-            <h1>
-              수학 문제, 사진만 올리면
-              <br />
-              <span>풀리</span>가 읽고 풀어줘요.
-            </h1>
-            <p className="hero-description">
-              과목을 고를 필요 없이 전체 고등학교 수학 범위에서 필요한 개념을 찾고,
-              단계별 풀이로 정리해 드려요.
-            </p>
-            <div className="hero-scope-card">
-              <p className="scope-title">문제풀이 범위</p>
-              <p className="scope-main">{SOLVING_SCOPE_LABEL}</p>
-              <p className="scope-list">{SOLVING_SCOPE_SUBJECTS.join(' · ')}</p>
-            </div>
-          </div>
-
-          <aside className="hero-assistant-card">
-            <div className="hero-assistant-bubble">
-              사진 업로드부터 풀이 전략, 정답 확인까지 한 화면에서 도와드릴게요.
-            </div>
-            <img src="/robot-mascot.png" alt="수학 도우미 로봇" className="hero-robot" />
-          </aside>
-        </section>
-
-        <section className="subject-tabs-wrap">
-          <div className="section-heading">
-            <h2>과목별 개념노트</h2>
-          </div>
-
-          <div className="subject-tabs">
+      <main className="app-page app-page-simple">
+        <section className="subject-nav">
+          {/* Subject tabs stay as placeholders for future concept-note screens. */}
+          <div className="subject-tabs subject-tabs-simple">
             {SUBJECTS.map((subject) => {
               const isActive = subject.id === activeSubjectId;
 
@@ -229,62 +178,62 @@ export default function HomePage() {
                   onClick={() => setActiveSubjectId(subject.id)}
                 >
                   <span className="subject-tab-label">{subject.shortLabel}</span>
-                  <span className="subject-tab-note">{subject.note}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="subject-note-panel">
-            <div className="subject-note-head">
-              <strong>{activeSubject.label}</strong>
-              <span>{activeSubject.scope}</span>
-            </div>
-            <p>{activeSubject.description}</p>
+          <div className="subject-placeholder">
+            <strong>{activeSubject.label}</strong>
+            <span>{activeSubject.note}</span>
           </div>
         </section>
 
-        <section className={`app-grid${hasSolution ? ' has-solution' : ''}`}>
-          <article className={`main-card upload-card${hasSolution ? ' is-compact' : ''}`}>
-            <div className="card-head">
+        <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
+          <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
+            {/* This card stays first so mobile users see the question entry point immediately. */}
+            <div className="upload-card-header">
               <div>
-                <h2>{hasSolution ? '새 문제 준비' : '문제 사진 올리기'}</h2>
-                <p className="card-subtitle">
-                  {hasSolution
-                    ? '다른 문제를 풀고 싶다면 새 사진을 올려 주세요.'
-                    : 'PNG, JPG 파일을 올리면 문제를 읽고 풀이를 준비합니다.'}
+                <h1 className="upload-main-title">{'\uBB38\uC81C \uC0AC\uC9C4 \uC62C\uB9AC\uAE30'}</h1>
+                <p className="upload-main-subtitle">
+                  {'\uC0AC\uC9C4\uB9CC \uC62C\uB9AC\uBA74 \uBC14\uB85C \uBB38\uC81C\uB97C \uC77D\uACE0 \uD480\uC774\uB97C \uC2DC\uC791\uD574\uC694.'}
                 </p>
               </div>
             </div>
 
-            <label className={`upload-dropzone${previewUrl ? ' has-preview' : ''}${hasSolution ? ' is-compact' : ''}`}>
+            <label className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}`}>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
               />
+
               {previewUrl ? (
-                <img src={previewUrl} alt="업로드한 문제 미리보기" className={`preview-image${hasSolution ? ' is-compact' : ''}`} />
+                <img
+                  src={previewUrl}
+                  alt="\uC5C5\uB85C\uB4DC\uD55C \uBB38\uC81C \uBBF8\uB9AC\uBCF4\uAE30"
+                  className={`preview-image${hasSolution ? ' is-compact' : ''}`}
+                />
               ) : (
-                <div className="upload-empty">
-                  <div className="upload-icon">📷</div>
-                  <strong>문제 사진을 올려 주세요.</strong>
-                  <span>선명한 사진일수록 수식 인식이 더 정확해져요.</span>
+                <div className="upload-empty upload-empty-simple">
+                  <img src="/robot-mascot.png" alt="\uBB38\uC81C \uC548\uB0B4 \uB85C\uBD07" className="upload-mascot" />
+                  <strong>{'\uBB38\uC81C \uC0AC\uC9C4\uC744 \uC62C\uB824 \uC8FC\uC138\uC694'}</strong>
+                  <span>{'\uC120\uBA85\uD55C \uC0AC\uC9C4\uC77C\uC218\uB85D \uB354 \uC815\uD655\uD558\uAC8C \uC77D\uC744 \uC218 \uC788\uC5B4\uC694.'}</span>
                 </div>
               )}
             </label>
 
             {previewUrl ? (
-              <div className="upload-toolbar">
-                <button type="button" className="ghost-button" onClick={() => handleFileChange(null)}>
-                  사진 지우기
-                </button>
-                <div className="primary-actions">
+              <div className="upload-toolbar upload-toolbar-simple">
+                <div className="primary-actions primary-actions-simple">
+                  <button type="button" className="ghost-button" onClick={() => handleFileChange(null)}>
+                    {'\uC0C8 \uBB38\uC81C'}
+                  </button>
                   <button type="button" className="ghost-button" onClick={handleReadProblem} disabled={!canRead}>
-                    {reading ? '문제 읽는 중...' : '문제 읽기'}
+                    {reading ? '\uC77D\uB294 \uC911...' : '\uBB38\uC81C \uC77D\uAE30'}
                   </button>
                   <button type="button" className="primary-button" onClick={handleSolve} disabled={!canSolve}>
-                    {solving ? '풀이 생성 중...' : hasSolution ? '새 문제 풀기' : '풀이 시작'}
+                    {solving ? '\uD480\uC774 \uC0DD\uC131 \uC911...' : '\uD480\uC774 \uC2DC\uC791'}
                   </button>
                 </div>
               </div>
@@ -292,21 +241,21 @@ export default function HomePage() {
 
             {error ? <div className="error-banner">{error}</div> : null}
 
-            <div className="sub-card recognized-card">
-              <div className="sub-card-head">
-                <h2>문제 읽기</h2>
-                <span className="sub-card-meta">OCR 결과</span>
+            {recognizedProblem ? (
+              <div className="sub-card recognized-card recognized-card-simple">
+                <div className="sub-card-head">
+                  <h2>{'\uBB38\uC81C \uC77D\uAE30'}</h2>
+                </div>
+                <div className="recognized-problem">
+                  <MarkdownViewer content={recognizedProblem} />
+                </div>
               </div>
-              <div className="recognized-problem">
-                <MarkdownViewer content={recognizedProblem.trim() || '문제를 읽으면 여기에 정리됩니다.'} />
-              </div>
-            </div>
+            ) : null}
 
             {showDebugConcepts && retrievedCards.length ? (
               <div className="sub-card concept-results-card">
                 <div className="sub-card-head">
-                  <h2>디버그 개념카드</h2>
-                  <span className="sub-card-meta">개발용</span>
+                  <h2>{'\uB514\uBC84\uADF8 \uAC1C\uB150\uCE74\uB4DC'}</h2>
                 </div>
                 <ul className="concept-card-list">
                   {retrievedCards.map((card) => (
@@ -314,11 +263,8 @@ export default function HomePage() {
                       <p className="concept-card-title">
                         [{card.course}] {card.id} {card.title}
                       </p>
-                      <p className="concept-card-detail">단원: {card.unit}</p>
-                      <p className="concept-card-detail">관련도: {card.score}점</p>
-                      {card.matchedTerms?.length ? (
-                        <p className="concept-card-detail">매칭 근거: {card.matchedTerms.join(', ')}</p>
-                      ) : null}
+                      <p className="concept-card-detail">{`\uB2E8\uC6D0: ${card.unit}`}</p>
+                      <p className="concept-card-detail">{`\uAD00\uB828\uB3C4: ${card.score}\uC810`}</p>
                     </li>
                   ))}
                 </ul>
@@ -326,13 +272,15 @@ export default function HomePage() {
             ) : null}
           </article>
 
-          <article className="main-card solution-card">
-            <div className="card-head">
+          <article className="main-card solution-card solution-card-simple">
+            {/* Keep the report simple: students should land on the solution, not debug metadata. */}
+            <div className="card-head card-head-simple">
               <div>
-                <h2>풀리의 풀이</h2>
-                <p className="card-subtitle">풀리가 문제를 읽고, 풀이 과정을 차근차근 정리했어요.</p>
+                <h2>{'\uD480\uB9AC\uC758 \uD480\uC774'}</h2>
+                <p className="card-subtitle">
+                  {'\uBB38\uC81C\uB97C \uC77D\uACE0 \uD480\uC774 \uACFC\uC815\uC744 \uCC28\uADFC\uCC28\uADFC \uC815\uB9AC\uD588\uC5B4\uC694.'}
+                </p>
               </div>
-              <span className="card-badge">6개 섹션</span>
             </div>
 
             {solutionSections ? (
@@ -349,13 +297,10 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className="solution-empty">
-                <div className="solution-empty-line is-strong" />
-                <div className="solution-empty-line" />
-                <div className="solution-empty-line" />
-                <div className="solution-empty-block" />
-                <div className="solution-empty-line is-short" />
-                <div className="solution-empty-line" />
+              <div className="solution-empty solution-empty-simple">
+                <p className="solution-placeholder-text">
+                  {'\uBB38\uC81C\uB97C \uC62C\uB9AC\uACE0 \uD480\uC774 \uC2DC\uC791\uC744 \uB204\uB974\uBA74 \uC5EC\uAE30\uC5D0 \uD480\uC774\uAC00 \uB098\uD0C0\uB098\uC694.'}
+                </p>
               </div>
             )}
           </article>

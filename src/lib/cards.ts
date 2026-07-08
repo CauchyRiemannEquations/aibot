@@ -24,8 +24,31 @@ const CARD_FILES_FOR_SOLVING = [
   'geometry_ai_rag_cards_v0_1.jsonl',
 ] as const;
 
+async function resolveProjectFilePath(fileName: string): Promise<string> {
+  const cwd = process.cwd();
+  const candidates = [
+    path.join(cwd, fileName),
+    path.join(cwd, '.', fileName),
+    path.join(cwd, '..', fileName),
+    path.join(cwd, '..', '..', fileName),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      await fs.access(candidate);
+      return candidate;
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error(
+    `파일을 찾지 못했습니다: ${fileName} (확인한 경로 기준: ${cwd})`,
+  );
+}
+
 async function readConceptCardsFile(fileName: string): Promise<ConceptCard[]> {
-  const cardsPath = path.join(process.cwd(), fileName);
+  const cardsPath = await resolveProjectFilePath(fileName);
   const raw = await fs.readFile(cardsPath, 'utf8');
 
   return raw
@@ -49,7 +72,7 @@ export const loadAllConceptCards = cache(async (): Promise<ConceptCard[]> => {
   );
 
   const cards: ConceptCard[] = [];
-  const missingFiles: string[] = [];
+  const failedFiles: string[] = [];
 
   for (const result of results) {
     if (result.status === 'fulfilled') {
@@ -57,22 +80,21 @@ export const loadAllConceptCards = cache(async (): Promise<ConceptCard[]> => {
       continue;
     }
 
-    const message =
-      result.reason instanceof Error ? result.reason.message : String(result.reason ?? 'unknown error');
-    const matchedFile = CARD_FILES_FOR_SOLVING.find((fileName) => message.includes(fileName));
-    missingFiles.push(matchedFile ?? message);
+    const reason = result.reason instanceof Error ? result.reason.message : String(result.reason ?? 'unknown error');
+    const matchedFile = CARD_FILES_FOR_SOLVING.find((fileName) => reason.includes(fileName));
+    failedFiles.push(matchedFile ?? reason);
   }
 
   if (!cards.length) {
     throw new Error(
-      `문제풀이용 개념카드를 불러오지 못했습니다. 누락된 파일: ${missingFiles.join(', ') || '알 수 없음'}`,
+      `문제풀이용 개념카드를 불러오지 못했습니다. 누락되었거나 배포에 포함되지 않은 파일: ${
+        failedFiles.join(', ') || '알 수 없음'
+      }`,
     );
   }
 
-  if (missingFiles.length) {
-    console.warn(
-      `[cards] 일부 개념카드 파일을 불러오지 못했습니다: ${missingFiles.join(', ')}`,
-    );
+  if (failedFiles.length) {
+    console.warn(`[cards] 일부 개념카드 파일을 불러오지 못했습니다: ${failedFiles.join(', ')}`);
   }
 
   return cards;

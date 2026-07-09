@@ -138,6 +138,53 @@ img {
   gap: 12px;
 }
 
+.solve-subject-picker {
+  display: grid;
+  gap: 8px;
+}
+
+.solve-subject-label {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.solve-subject-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(59, 111, 245, 0.18);
+  background: #fff;
+  color: var(--ink);
+}
+
+.solve-subject-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.solve-scope-chip {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(59, 111, 245, 0.07);
+  color: var(--ink);
+}
+
+.solve-scope-chip strong {
+  font-size: 0.92rem;
+}
+
+.solve-scope-chip span {
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .upload-card.is-compact {
   align-content: start;
 }
@@ -457,7 +504,7 @@ img {
 }
 
 .markdown {
-  line-height: 1.84;
+  line-height: 1.98;
 }
 
 .markdown h2 {
@@ -475,12 +522,28 @@ img {
 
 .markdown p,
 .markdown li {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
+}
+
+.markdown p:last-child,
+.markdown li:last-child {
+  margin-bottom: 0;
 }
 
 .markdown ul,
 .markdown ol {
   padding-left: 20px;
+  margin: 0 0 16px;
+}
+
+.markdown strong {
+  font-weight: 800;
+}
+
+.markdown .katex-display {
+  margin: 14px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 @media (max-width: 920px) {
@@ -543,6 +606,11 @@ img {
     font-size: 0.98rem;
   }
 
+  .solve-subject-select {
+    min-height: 46px;
+    border-radius: 14px;
+  }
+
   .preview-image {
     max-height: 360px;
   }
@@ -573,6 +641,17 @@ img {
 
   .solution-step-body {
     padding: 0 14px 14px;
+  }
+
+  .markdown {
+    line-height: 1.92;
+  }
+
+  .markdown p,
+  .markdown li,
+  .markdown ul,
+  .markdown ol {
+    margin-bottom: 14px;
   }
 }
 
@@ -634,6 +713,15 @@ img {
     width: 100%;
     max-width: 220px;
     font-size: 0.94rem;
+  }
+
+  .solve-subject-label {
+    font-size: 0.88rem;
+  }
+
+  .solve-subject-note,
+  .solve-scope-chip span {
+    font-size: 0.82rem;
   }
 
   .upload-toolbar-simple {

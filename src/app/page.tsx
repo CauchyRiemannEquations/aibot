@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
 import { SolutionStep } from '@/components/solution-step';
-import { SUBJECTS } from '@/lib/subjects';
-import type { SolverSections } from '@/lib/types';
+import { SUBJECTS, getSubjectById } from '@/lib/subjects';
+import type { SolverSections, SubjectId } from '@/lib/types';
 
 type RetrievedCardSummary = {
   id: string;
@@ -21,6 +21,10 @@ type SolveResponse = {
   retrievedCards?: RetrievedCardSummary[];
   sections: SolverSections;
   markdown: string;
+  solvingScope?: {
+    label: string;
+    subjects: string[];
+  };
 };
 
 const showDebugConcepts = process.env.NEXT_PUBLIC_SHOW_DEBUG_CONCEPTS === 'true';
@@ -40,7 +44,6 @@ const solutionStepConfigs: Array<{
 ];
 
 export default function HomePage() {
-  // 버튼으로만 업로드를 열어서 모바일에서 기본 파일 입력 UI가 튀지 않게 둡니다.
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -51,11 +54,14 @@ export default function HomePage() {
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
   const [solving, setSolving] = useState(false);
-  const [activeSubjectId, setActiveSubjectId] = useState('common-math-1');
+  const [activeSubjectId, setActiveSubjectId] = useState<SubjectId>('common-math-1');
+  const [selectedSolveSubjectId, setSelectedSolveSubjectId] = useState<SubjectId>('calculus-2');
+  const [solvingScope, setSolvingScope] = useState<{ label: string; subjects: string[] } | null>(null);
 
   const canRead = !!selectedFile && !reading;
   const canSolve = !!recognizedProblem.trim() && !solving;
   const hasSolution = solutionSections !== null;
+  const selectedSolveSubject = getSubjectById(selectedSolveSubjectId);
 
   useEffect(() => {
     return () => {
@@ -69,6 +75,7 @@ export default function HomePage() {
     setRecognizedProblem('');
     setRetrievedCards([]);
     setSolutionSections(null);
+    setSolvingScope(null);
     setError('');
   }
 
@@ -96,6 +103,7 @@ export default function HomePage() {
     setError('');
     setSolutionSections(null);
     setRetrievedCards([]);
+    setSolvingScope(null);
 
     try {
       const formData = new FormData();
@@ -137,6 +145,7 @@ export default function HomePage() {
         },
         body: JSON.stringify({
           recognizedProblem,
+          subjectId: selectedSolveSubjectId,
         }),
       });
 
@@ -148,6 +157,7 @@ export default function HomePage() {
 
       setRetrievedCards(data.retrievedCards ?? []);
       setSolutionSections(data.sections);
+      setSolvingScope(data.solvingScope ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : '풀이를 만들지 못했어요.');
     } finally {
@@ -179,7 +189,7 @@ export default function HomePage() {
 
         <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
           <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
-            {/* 첫 화면에서는 업로드 행동만 가장 먼저 보이도록 유지합니다. */}
+            {/* 학생은 여기서 풀이 과목만 고르면 되고, 실제 카드 범위는 서버가 위계대로 제한합니다. */}
             <input
               ref={fileInputRef}
               type="file"
@@ -187,6 +197,25 @@ export default function HomePage() {
               className="file-input-hidden"
               onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             />
+
+            <div className="solve-subject-picker">
+              <label htmlFor="solve-subject" className="solve-subject-label">
+                풀이 과목 선택
+              </label>
+              <select
+                id="solve-subject"
+                className="solve-subject-select"
+                value={selectedSolveSubjectId}
+                onChange={(event) => setSelectedSolveSubjectId(event.target.value as SubjectId)}
+              >
+                {SUBJECTS.map((subject) => (
+                  <option key={subject.id} value={subject.id}>
+                    {subject.label}
+                  </option>
+                ))}
+              </select>
+              <p className="solve-subject-note">{selectedSolveSubject.scope}</p>
+            </div>
 
             <div
               className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${
@@ -222,6 +251,13 @@ export default function HomePage() {
                     {solving ? '풀이 생성 중...' : '풀어주세요'}
                   </button>
                 </div>
+              </div>
+            ) : null}
+
+            {solvingScope ? (
+              <div className="solve-scope-chip">
+                <strong>{solvingScope.label}</strong>
+                <span>{solvingScope.subjects.join(' · ')}</span>
               </div>
             ) : null}
 
@@ -263,7 +299,7 @@ export default function HomePage() {
               <div className="card-head card-head-simple">
                 <div>
                   <h2>풀리의 풀이</h2>
-                  <p className="card-subtitle">문제를 읽고 풀이 과정을 차근차근 정리했어요.</p>
+                  <p className="card-subtitle">선택한 과목 범위 안에서 풀이 과정을 차근차근 정리했어요.</p>
                 </div>
               </div>
 

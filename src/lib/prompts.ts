@@ -105,6 +105,7 @@ ${cardsText}
 - 학생에게 개념카드 ID, 과목명, 단원명, 관련도 점수, RAG 검색 결과를 직접 노출하지 마세요.
 - [사용 개념] 태그는 내부 정리용으로 최소한만 작성하세요.
 - 풀이 전략은 학생이 따라 할 수 있는 행동 중심으로 설명하세요.
+- 단계별 풀이와 정답 확인은 절대 비워 두지 마세요.
 - 정답, 검산, 비슷한 문제 팁에서도 수식은 반드시 $...$ 또는 $$...$$ 형식으로 작성하세요.`;
 }
 
@@ -135,26 +136,38 @@ function normalizeMathDelimiters(text: string): string {
 function improveSectionReadability(text: string): string {
   return text
     .replace(/\r\n/g, '\n')
-    .replace(/([다요죠니다]\.)\s+/g, '$1\n\n')
+    .replace(/(니다\.|이에요\.|예요\.|합니다\.|됩니다\.|하세요\.|봐요\.|죠\.|다\.)\s+/g, '$1\n\n')
     .replace(/([.!?])\s+(?=[A-Za-z가-힣])/g, '$1\n\n')
     .replace(/(?<!\n)\n(?!\n|[-*]\s|\d+\.\s|>\s)/g, '\n\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
-function formatSectionContent(text: string): string {
-  return improveSectionReadability(normalizeMathDelimiters(text));
+function getFallbackSectionText(tag: keyof SolverSections): string {
+  switch (tag) {
+    case 'stepByStep':
+      return '풀이 과정을 충분히 생성하지 못했습니다. 다시 시도해 주세요.';
+    case 'answer':
+      return '정답을 충분히 생성하지 못했습니다. 다시 시도해 주세요.';
+    default:
+      return '내용을 다시 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  }
+}
+
+function formatSectionContent(text: string, tag: keyof SolverSections): string {
+  const formatted = improveSectionReadability(normalizeMathDelimiters(text));
+  return formatted || getFallbackSectionText(tag);
 }
 
 export function normalizeSolverSections(source: string): SolverSections {
   return {
-    problemReading: formatSectionContent(extractTagValue(source, 'problemReading')),
-    usedConcepts: formatSectionContent(extractTagValue(source, 'usedConcepts')),
-    strategy: formatSectionContent(extractTagValue(source, 'strategy')),
-    stepByStep: formatSectionContent(extractTagValue(source, 'stepByStep')),
-    answer: formatSectionContent(extractTagValue(source, 'answer')),
-    check: formatSectionContent(extractTagValue(source, 'check')),
-    similarTip: formatSectionContent(extractTagValue(source, 'similarTip')),
+    problemReading: formatSectionContent(extractTagValue(source, 'problemReading'), 'problemReading'),
+    usedConcepts: formatSectionContent(extractTagValue(source, 'usedConcepts'), 'usedConcepts'),
+    strategy: formatSectionContent(extractTagValue(source, 'strategy'), 'strategy'),
+    stepByStep: formatSectionContent(extractTagValue(source, 'stepByStep'), 'stepByStep'),
+    answer: formatSectionContent(extractTagValue(source, 'answer'), 'answer'),
+    check: formatSectionContent(extractTagValue(source, 'check'), 'check'),
+    similarTip: formatSectionContent(extractTagValue(source, 'similarTip'), 'similarTip'),
   };
 }
 

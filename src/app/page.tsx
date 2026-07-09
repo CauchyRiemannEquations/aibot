@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
 import { SolutionStep } from '@/components/solution-step';
-import { SUBJECTS, getSubjectById } from '@/lib/subjects';
+import { SUBJECTS } from '@/lib/subjects';
 import type { SolverSections } from '@/lib/types';
 
 type RetrievedCardSummary = {
@@ -40,9 +40,11 @@ const solutionStepConfigs: Array<{
 ];
 
 export default function HomePage() {
-  // Keep the page state in one place so later TSX edits stay easy.
+  // 업로드 트리거를 버튼으로 분리해서 기본 파일 입력 UI를 숨깁니다.
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [previewUrl, setPreviewUrl] = useState('');
   const [recognizedProblem, setRecognizedProblem] = useState('');
   const [retrievedCards, setRetrievedCards] = useState<RetrievedCardSummary[]>([]);
   const [solutionSections, setSolutionSections] = useState<SolverSections | null>(null);
@@ -51,7 +53,6 @@ export default function HomePage() {
   const [solving, setSolving] = useState(false);
   const [activeSubjectId, setActiveSubjectId] = useState('common-math-1');
 
-  const activeSubject = getSubjectById(activeSubjectId);
   const canRead = !!selectedFile && !reading;
   const canSolve = !!recognizedProblem.trim() && !solving;
   const hasSolution = solutionSections !== null;
@@ -79,6 +80,10 @@ export default function HomePage() {
     setSelectedFile(file);
     setPreviewUrl(file ? URL.createObjectURL(file) : '');
     resetOutputs();
+  }
+
+  function openFilePicker() {
+    fileInputRef.current?.click();
   }
 
   async function handleReadProblem() {
@@ -152,20 +157,8 @@ export default function HomePage() {
 
   return (
     <div className="app-shell">
-      <header className="app-topbar">
-        <div className="app-topbar-inner">
-          <div className="brand-lockup">
-            <div className="brand-logo-wrap">
-              <img src="/robot-mascot.png" alt="풀리 로봇 마스코트" className="brand-logo" />
-            </div>
-            <span className="brand-name">풀리</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="app-page app-page-simple">
+      <main className="app-page app-page-simple app-page-no-header">
         <section className="subject-nav">
-          {/* Subject tabs stay as placeholders for future concept-note screens. */}
           <div className="subject-tabs subject-tabs-simple">
             {SUBJECTS.map((subject) => {
               const isActive = subject.id === activeSubjectId;
@@ -186,37 +179,41 @@ export default function HomePage() {
 
         <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
           <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
-            {/* 첫 화면은 업로드만 보이도록 제목과 설명을 덜어낸 상태입니다. */}
-            <label
-              className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${
-                hasSolution ? ' is-compact' : ''
-              }`}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
-              />
+            {/* 첫 화면에서는 업로드 행동만 선명하게 보이도록 버튼 중심으로 둡니다. */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="file-input-hidden"
+              onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
+            />
 
+            <div className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${hasSolution ? ' is-compact' : ''}`}>
               {previewUrl ? (
                 <img
                   src={previewUrl}
-                  alt="\uC5C5\uB85C\uB4DC\uD55C \uBB38\uC81C \uBBF8\uB9AC\uBCF4\uAE30"
+                  alt="업로드한 문제 미리보기"
                   className={`preview-image${hasSolution ? ' is-compact' : ''}`}
                 />
               ) : (
                 <div className="upload-empty upload-empty-simple">
-                  <span className="upload-file-chip">문제 사진 올리기</span>
+                  <button type="button" className="upload-file-chip" onClick={openFilePicker}>
+                    문제 사진 올리기
+                  </button>
+                  <div className="upload-bubble">나만의 AI 수학로봇 풀리 입니다.</div>
                   <img src="/robot-mascot.png" alt="문제 안내 로봇" className="upload-mascot" />
                 </div>
               )}
-            </label>
+            </div>
 
             {previewUrl ? (
               <div className="upload-toolbar upload-toolbar-simple">
                 <div className="primary-actions primary-actions-simple">
                   <button type="button" className="ghost-button" onClick={() => handleFileChange(null)}>
                     새 문제
+                  </button>
+                  <button type="button" className="ghost-button" onClick={openFilePicker}>
+                    사진 바꾸기
                   </button>
                   <button type="button" className="ghost-button" onClick={handleReadProblem} disabled={!canRead}>
                     {reading ? '읽는 중...' : '문제 읽기'}
@@ -263,13 +260,12 @@ export default function HomePage() {
 
           {hasSolution ? (
             <article className="main-card solution-card solution-card-simple">
-            {/* Keep the report simple: students should land on the solution, not debug metadata. */}
-            <div className="card-head card-head-simple">
-              <div>
-                <h2>풀리의 풀이</h2>
-                <p className="card-subtitle">문제를 읽고 풀이 과정을 차근차근 정리했어요.</p>
+              <div className="card-head card-head-simple">
+                <div>
+                  <h2>풀리의 풀이</h2>
+                  <p className="card-subtitle">문제를 읽고 풀이 과정을 차근차근 정리했어요.</p>
+                </div>
               </div>
-            </div>
 
               <div className="solution-report">
                 {solutionStepConfigs.map((step, index) => (
@@ -277,7 +273,7 @@ export default function HomePage() {
                     key={step.key}
                     number={index + 1}
                     title={step.title}
-                    content={solutionSections[step.key]}
+                    content={solutionSections?.[step.key] ?? ''}
                     defaultOpen={step.defaultOpen}
                     tone={step.tone}
                   />

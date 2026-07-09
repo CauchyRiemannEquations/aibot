@@ -4,7 +4,8 @@ import './globals.css';
 import 'katex/dist/katex.min.css';
 
 export const metadata: Metadata = {
-  title: 'AI 수학문제 풀이 봇 풀리',
+  title: '풀리 | 수학 문제 풀이 봇',
+  description: '문제 사진을 올리면 수학 문제를 읽고 단계별 풀이를 보여주는 AI 수학 풀이 서비스',
 };
 
 export default function RootLayout({

@@ -40,7 +40,7 @@ const solutionStepConfigs: Array<{
 ];
 
 export default function HomePage() {
-  // 업로드 트리거를 버튼으로 분리해서 기본 파일 입력 UI를 숨깁니다.
+  // 버튼으로만 업로드를 열어서 모바일에서 기본 파일 입력 UI가 튀지 않게 둡니다.
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -179,7 +179,7 @@ export default function HomePage() {
 
         <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
           <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
-            {/* 첫 화면에서는 업로드 행동만 선명하게 보이도록 버튼 중심으로 둡니다. */}
+            {/* 첫 화면에서는 업로드 행동만 가장 먼저 보이도록 유지합니다. */}
             <input
               ref={fileInputRef}
               type="file"
@@ -188,13 +188,13 @@ export default function HomePage() {
               onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             />
 
-            <div className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${hasSolution ? ' is-compact' : ''}`}>
+            <div
+              className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${
+                hasSolution ? ' is-compact' : ''
+              }`}
+            >
               {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="업로드한 문제 미리보기"
-                  className={`preview-image${hasSolution ? ' is-compact' : ''}`}
-                />
+                <img src={previewUrl} alt="업로드한 문제 미리보기" className={`preview-image${hasSolution ? ' is-compact' : ''}`} />
               ) : (
                 <div className="upload-empty upload-empty-simple">
                   <button type="button" className="upload-file-chip" onClick={openFilePicker}>

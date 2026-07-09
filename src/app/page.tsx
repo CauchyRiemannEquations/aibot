@@ -31,12 +31,12 @@ const solutionStepConfigs: Array<{
   defaultOpen: boolean;
   tone?: 'default' | 'answer' | 'tip';
 }> = [
-  { key: 'problemReading', title: '\uBB38\uC81C \uC77D\uAE30', defaultOpen: false },
-  { key: 'strategy', title: '\uD480\uC774 \uC804\uB7B5', defaultOpen: true },
-  { key: 'stepByStep', title: '\uB2E8\uACC4\uBCC4 \uD480\uC774', defaultOpen: true },
-  { key: 'answer', title: '\uC815\uB2F5 \uD655\uC778', defaultOpen: true, tone: 'answer' },
-  { key: 'check', title: '\uAC80\uC0B0\uD558\uAE30', defaultOpen: false },
-  { key: 'similarTip', title: '\uBE44\uC2B7\uD55C \uBB38\uC81C\uB294 \uC774\uB807\uAC8C \uD480\uC5B4\uC694', defaultOpen: false, tone: 'tip' },
+  { key: 'problemReading', title: '문제 읽기', defaultOpen: false },
+  { key: 'strategy', title: '풀이 전략', defaultOpen: true },
+  { key: 'stepByStep', title: '단계별 풀이', defaultOpen: true },
+  { key: 'answer', title: '정답 확인', defaultOpen: true, tone: 'answer' },
+  { key: 'check', title: '검산하기', defaultOpen: false },
+  { key: 'similarTip', title: '비슷한 문제는 이렇게 풀어요', defaultOpen: false, tone: 'tip' },
 ];
 
 export default function HomePage() {
@@ -83,7 +83,7 @@ export default function HomePage() {
 
   async function handleReadProblem() {
     if (!selectedFile) {
-      setError('\uBB38\uC81C \uC0AC\uC9C4\uC744 \uBA3C\uC800 \uC62C\uB824 \uC8FC\uC138\uC694.');
+      setError('문제 사진을 먼저 올려 주세요.');
       return;
     }
 
@@ -104,12 +104,12 @@ export default function HomePage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || '\uBB38\uC81C\uB97C \uC77D\uC9C0 \uBABB\uD588\uC5B4\uC694.');
+        throw new Error(data.error || '문제를 읽지 못했어요.');
       }
 
       setRecognizedProblem(data.recognizedProblem);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '\uBB38\uC81C\uB97C \uC77D\uC9C0 \uBABB\uD588\uC5B4\uC694.');
+      setError(err instanceof Error ? err.message : '문제를 읽지 못했어요.');
     } finally {
       setReading(false);
     }
@@ -117,7 +117,7 @@ export default function HomePage() {
 
   async function handleSolve() {
     if (!recognizedProblem.trim()) {
-      setError('\uBB38\uC81C\uB97C \uBA3C\uC800 \uC77D\uC5B4 \uC8FC\uC138\uC694.');
+      setError('문제를 먼저 읽어 주세요.');
       return;
     }
 
@@ -138,13 +138,13 @@ export default function HomePage() {
       const data = (await response.json()) as SolveResponse & { error?: string };
 
       if (!response.ok) {
-        throw new Error(data.error || '\uD480\uC774\uB97C \uB9CC\uB4E4\uC9C0 \uBABB\uD588\uC5B4\uC694.');
+        throw new Error(data.error || '풀이를 만들지 못했어요.');
       }
 
       setRetrievedCards(data.retrievedCards ?? []);
       setSolutionSections(data.sections);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '\uD480\uC774\uB97C \uB9CC\uB4E4\uC9C0 \uBABB\uD588\uC5B4\uC694.');
+      setError(err instanceof Error ? err.message : '풀이를 만들지 못했어요.');
     } finally {
       setSolving(false);
     }
@@ -156,9 +156,9 @@ export default function HomePage() {
         <div className="app-topbar-inner">
           <div className="brand-lockup">
             <div className="brand-logo-wrap">
-              <img src="/robot-mascot.png" alt="\uD480\uB9AC \uB85C\uBD07 \uB9C8\uC2A4\uCF54\uD2B8" className="brand-logo" />
+              <img src="/robot-mascot.png" alt="풀리 로봇 마스코트" className="brand-logo" />
             </div>
-            <span className="brand-name">\uD480\uB9AC</span>
+            <span className="brand-name">풀리</span>
           </div>
         </div>
       </header>
@@ -182,26 +182,16 @@ export default function HomePage() {
               );
             })}
           </div>
-
-          <div className="subject-placeholder">
-            <strong>{activeSubject.label}</strong>
-            <span>{activeSubject.note}</span>
-          </div>
         </section>
 
         <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
           <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
-            {/* This card stays first so mobile users see the question entry point immediately. */}
-            <div className="upload-card-header">
-              <div>
-                <h1 className="upload-main-title">{'\uBB38\uC81C \uC0AC\uC9C4 \uC62C\uB9AC\uAE30'}</h1>
-                <p className="upload-main-subtitle">
-                  {'\uC0AC\uC9C4\uB9CC \uC62C\uB9AC\uBA74 \uBC14\uB85C \uBB38\uC81C\uB97C \uC77D\uACE0 \uD480\uC774\uB97C \uC2DC\uC791\uD574\uC694.'}
-                </p>
-              </div>
-            </div>
-
-            <label className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}`}>
+            {/* 첫 화면은 업로드만 보이도록 제목과 설명을 덜어낸 상태입니다. */}
+            <label
+              className={`upload-dropzone upload-dropzone-simple${previewUrl ? ' has-preview' : ''}${
+                hasSolution ? ' is-compact' : ''
+              }`}
+            >
               <input
                 type="file"
                 accept="image/*"
@@ -216,9 +206,8 @@ export default function HomePage() {
                 />
               ) : (
                 <div className="upload-empty upload-empty-simple">
-                  <img src="/robot-mascot.png" alt="\uBB38\uC81C \uC548\uB0B4 \uB85C\uBD07" className="upload-mascot" />
-                  <strong>{'\uBB38\uC81C \uC0AC\uC9C4\uC744 \uC62C\uB824 \uC8FC\uC138\uC694'}</strong>
-                  <span>{'\uC120\uBA85\uD55C \uC0AC\uC9C4\uC77C\uC218\uB85D \uB354 \uC815\uD655\uD558\uAC8C \uC77D\uC744 \uC218 \uC788\uC5B4\uC694.'}</span>
+                  <span className="upload-file-chip">문제 사진 올리기</span>
+                  <img src="/robot-mascot.png" alt="문제 안내 로봇" className="upload-mascot" />
                 </div>
               )}
             </label>
@@ -227,13 +216,13 @@ export default function HomePage() {
               <div className="upload-toolbar upload-toolbar-simple">
                 <div className="primary-actions primary-actions-simple">
                   <button type="button" className="ghost-button" onClick={() => handleFileChange(null)}>
-                    {'\uC0C8 \uBB38\uC81C'}
+                    새 문제
                   </button>
                   <button type="button" className="ghost-button" onClick={handleReadProblem} disabled={!canRead}>
-                    {reading ? '\uC77D\uB294 \uC911...' : '\uBB38\uC81C \uC77D\uAE30'}
+                    {reading ? '읽는 중...' : '문제 읽기'}
                   </button>
                   <button type="button" className="primary-button" onClick={handleSolve} disabled={!canSolve}>
-                    {solving ? '\uD480\uC774 \uC0DD\uC131 \uC911...' : '\uD480\uC774 \uC2DC\uC791'}
+                    {solving ? '풀이 생성 중...' : '풀어주세요'}
                   </button>
                 </div>
               </div>
@@ -241,10 +230,10 @@ export default function HomePage() {
 
             {error ? <div className="error-banner">{error}</div> : null}
 
-            {recognizedProblem ? (
+            {hasSolution && recognizedProblem ? (
               <div className="sub-card recognized-card recognized-card-simple">
                 <div className="sub-card-head">
-                  <h2>{'\uBB38\uC81C \uC77D\uAE30'}</h2>
+                  <h2>문제 읽기</h2>
                 </div>
                 <div className="recognized-problem">
                   <MarkdownViewer content={recognizedProblem} />
@@ -255,7 +244,7 @@ export default function HomePage() {
             {showDebugConcepts && retrievedCards.length ? (
               <div className="sub-card concept-results-card">
                 <div className="sub-card-head">
-                  <h2>{'\uB514\uBC84\uADF8 \uAC1C\uB150\uCE74\uB4DC'}</h2>
+                  <h2>디버그 개념카드</h2>
                 </div>
                 <ul className="concept-card-list">
                   {retrievedCards.map((card) => (
@@ -263,8 +252,8 @@ export default function HomePage() {
                       <p className="concept-card-title">
                         [{card.course}] {card.id} {card.title}
                       </p>
-                      <p className="concept-card-detail">{`\uB2E8\uC6D0: ${card.unit}`}</p>
-                      <p className="concept-card-detail">{`\uAD00\uB828\uB3C4: ${card.score}\uC810`}</p>
+                      <p className="concept-card-detail">{`단원: ${card.unit}`}</p>
+                      <p className="concept-card-detail">{`관련도: ${card.score}점`}</p>
                     </li>
                   ))}
                 </ul>
@@ -272,18 +261,16 @@ export default function HomePage() {
             ) : null}
           </article>
 
-          <article className="main-card solution-card solution-card-simple">
+          {hasSolution ? (
+            <article className="main-card solution-card solution-card-simple">
             {/* Keep the report simple: students should land on the solution, not debug metadata. */}
             <div className="card-head card-head-simple">
               <div>
-                <h2>{'\uD480\uB9AC\uC758 \uD480\uC774'}</h2>
-                <p className="card-subtitle">
-                  {'\uBB38\uC81C\uB97C \uC77D\uACE0 \uD480\uC774 \uACFC\uC815\uC744 \uCC28\uADFC\uCC28\uADFC \uC815\uB9AC\uD588\uC5B4\uC694.'}
-                </p>
+                <h2>풀리의 풀이</h2>
+                <p className="card-subtitle">문제를 읽고 풀이 과정을 차근차근 정리했어요.</p>
               </div>
             </div>
 
-            {solutionSections ? (
               <div className="solution-report">
                 {solutionStepConfigs.map((step, index) => (
                   <SolutionStep
@@ -296,14 +283,8 @@ export default function HomePage() {
                   />
                 ))}
               </div>
-            ) : (
-              <div className="solution-empty solution-empty-simple">
-                <p className="solution-placeholder-text">
-                  {'\uBB38\uC81C\uB97C \uC62C\uB9AC\uACE0 \uD480\uC774 \uC2DC\uC791\uC744 \uB204\uB974\uBA74 \uC5EC\uAE30\uC5D0 \uD480\uC774\uAC00 \uB098\uD0C0\uB098\uC694.'}
-                </p>
-              </div>
-            )}
-          </article>
+            </article>
+          ) : null}
         </section>
       </main>
     </div>

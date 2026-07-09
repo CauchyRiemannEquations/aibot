@@ -159,32 +159,6 @@ img {
   color: var(--ink);
 }
 
-.solve-subject-note {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.55;
-}
-
-.solve-scope-chip {
-  display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(59, 111, 245, 0.07);
-  color: var(--ink);
-}
-
-.solve-scope-chip strong {
-  font-size: 0.92rem;
-}
-
-.solve-scope-chip span {
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.5;
-}
-
 .upload-card.is-compact {
   align-content: start;
 }
@@ -540,6 +514,13 @@ img {
   font-weight: 800;
 }
 
+.markdown small,
+.markdown small .katex,
+.markdown em .katex,
+.markdown .katex {
+  font-size: 1em;
+}
+
 .markdown .katex-display {
   margin: 14px 0;
   overflow-x: auto;
@@ -717,11 +698,6 @@ img {
 
   .solve-subject-label {
     font-size: 0.88rem;
-  }
-
-  .solve-subject-note,
-  .solve-scope-chip span {
-    font-size: 0.82rem;
   }
 
   .upload-toolbar-simple {

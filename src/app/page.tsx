@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
 import { SolutionStep } from '@/components/solution-step';
-import { SUBJECTS, getSubjectById } from '@/lib/subjects';
+import { SUBJECTS } from '@/lib/subjects';
 import type { SolverSections, SubjectId } from '@/lib/types';
 
 type RetrievedCardSummary = {
@@ -21,10 +21,6 @@ type SolveResponse = {
   retrievedCards?: RetrievedCardSummary[];
   sections: SolverSections;
   markdown: string;
-  solvingScope?: {
-    label: string;
-    subjects: string[];
-  };
 };
 
 const showDebugConcepts = process.env.NEXT_PUBLIC_SHOW_DEBUG_CONCEPTS === 'true';
@@ -56,12 +52,10 @@ export default function HomePage() {
   const [solving, setSolving] = useState(false);
   const [activeSubjectId, setActiveSubjectId] = useState<SubjectId>('common-math-1');
   const [selectedSolveSubjectId, setSelectedSolveSubjectId] = useState<SubjectId>('calculus-2');
-  const [solvingScope, setSolvingScope] = useState<{ label: string; subjects: string[] } | null>(null);
 
   const canRead = !!selectedFile && !reading;
   const canSolve = !!recognizedProblem.trim() && !solving;
   const hasSolution = solutionSections !== null;
-  const selectedSolveSubject = getSubjectById(selectedSolveSubjectId);
 
   useEffect(() => {
     return () => {
@@ -75,7 +69,6 @@ export default function HomePage() {
     setRecognizedProblem('');
     setRetrievedCards([]);
     setSolutionSections(null);
-    setSolvingScope(null);
     setError('');
   }
 
@@ -103,7 +96,6 @@ export default function HomePage() {
     setError('');
     setSolutionSections(null);
     setRetrievedCards([]);
-    setSolvingScope(null);
 
     try {
       const formData = new FormData();
@@ -157,7 +149,6 @@ export default function HomePage() {
 
       setRetrievedCards(data.retrievedCards ?? []);
       setSolutionSections(data.sections);
-      setSolvingScope(data.solvingScope ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : '풀이를 만들지 못했어요.');
     } finally {
@@ -189,7 +180,6 @@ export default function HomePage() {
 
         <section className={`main-layout${hasSolution ? ' has-solution' : ''}`}>
           <article className={`main-card upload-card upload-card-simple${hasSolution ? ' is-compact' : ''}`}>
-            {/* 학생은 여기서 풀이 과목만 고르면 되고, 실제 카드 범위는 서버가 위계대로 제한합니다. */}
             <input
               ref={fileInputRef}
               type="file"
@@ -214,7 +204,6 @@ export default function HomePage() {
                   </option>
                 ))}
               </select>
-              <p className="solve-subject-note">{selectedSolveSubject.scope}</p>
             </div>
 
             <div
@@ -238,11 +227,8 @@ export default function HomePage() {
             {previewUrl ? (
               <div className="upload-toolbar upload-toolbar-simple">
                 <div className="primary-actions primary-actions-simple">
-                  <button type="button" className="ghost-button" onClick={() => handleFileChange(null)}>
-                    새 문제
-                  </button>
                   <button type="button" className="ghost-button" onClick={openFilePicker}>
-                    사진 바꾸기
+                    문제 바꾸기
                   </button>
                   <button type="button" className="ghost-button" onClick={handleReadProblem} disabled={!canRead}>
                     {reading ? '읽는 중...' : '문제 읽기'}
@@ -251,13 +237,6 @@ export default function HomePage() {
                     {solving ? '풀이 생성 중...' : '풀어주세요'}
                   </button>
                 </div>
-              </div>
-            ) : null}
-
-            {solvingScope ? (
-              <div className="solve-scope-chip">
-                <strong>{solvingScope.label}</strong>
-                <span>{solvingScope.subjects.join(' · ')}</span>
               </div>
             ) : null}
 

@@ -15,19 +15,27 @@ const CARD_FILE_BY_SUBJECT: Record<SubjectId, string> = {
 };
 
 /*
- * 교육과정 위계 (2022 개정):
- * 공통수학Ⅰ → 공통수학Ⅱ → 대수 → 미적분Ⅰ → 미적분Ⅱ
- * 확률과 통계, 기하는 대수까지를 기반으로 하는 독립 과목이며
- * 서로의 개념(예: 벡터)을 끌어다 쓰지 않는다.
+ * 교육과정 위계:
+ * 공통수학Ⅰ → 공통수학Ⅱ → 대수 → 미적분Ⅰ
+ * 확률과 통계: 미적분Ⅰ까지 모두 사용 가능
+ * 미적분Ⅱ: 확률과 통계까지 앞선 다섯 과목 모두 사용 가능
+ * 기하: 미적분Ⅰ까지 사용 가능 (미적분Ⅱ 내용만 금지) — 벡터는 기하 전용
  */
 export const SOLVING_SUBJECT_SCOPE: Record<SubjectId, SubjectId[]> = {
   'common-math-1': ['common-math-1'],
   'common-math-2': ['common-math-1', 'common-math-2'],
   algebra: ['common-math-1', 'common-math-2', 'algebra'],
   'calculus-1': ['common-math-1', 'common-math-2', 'algebra', 'calculus-1'],
-  probability: ['common-math-1', 'common-math-2', 'algebra', 'probability'],
-  geometry: ['common-math-1', 'common-math-2', 'algebra', 'geometry'],
-  'calculus-2': ['common-math-1', 'common-math-2', 'algebra', 'calculus-1', 'calculus-2'],
+  probability: ['common-math-1', 'common-math-2', 'algebra', 'calculus-1', 'probability'],
+  geometry: ['common-math-1', 'common-math-2', 'algebra', 'calculus-1', 'geometry'],
+  'calculus-2': [
+    'common-math-1',
+    'common-math-2',
+    'algebra',
+    'calculus-1',
+    'probability',
+    'calculus-2',
+  ],
 };
 
 async function resolveProjectFilePath(fileName: string): Promise<string> {

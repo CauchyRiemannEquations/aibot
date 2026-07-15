@@ -245,7 +245,7 @@ export async function streamTutorReply(params: {
     body: JSON.stringify({
       model,
       stream: true,
-      temperature: 0.7,
+      temperature: 0.5,
       max_tokens: 900,
       messages: [{ role: 'system', content: params.systemPrompt }, ...params.messages],
     }),

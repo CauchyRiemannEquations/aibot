@@ -226,7 +226,7 @@ export type ChatMessage = {
 };
 
 /*
- * 소크라 튜터용 스트리밍 호출.
+ * SOCRA 튜터용 스트리밍 호출.
  * OpenRouter SSE 응답에서 delta 텍스트만 뽑아 plain text 스트림으로 변환한다.
  * API 키는 이 서버 모듈 밖으로 나가지 않는다.
  */
@@ -246,7 +246,7 @@ export async function streamTutorReply(params: {
       model,
       stream: true,
       temperature: 0.7,
-      max_tokens: 900,
+      max_tokens: 1400,
       messages: [{ role: 'system', content: params.systemPrompt }, ...params.messages],
     }),
   };

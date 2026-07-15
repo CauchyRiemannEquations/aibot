@@ -3,6 +3,7 @@ import { Agent } from 'undici';
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const DEFAULT_VISION_MODEL = 'google/gemini-2.5-flash';
 const DEFAULT_SOLVER_MODEL = 'google/gemini-2.5-flash';
+const DEFAULT_TUTOR_MODEL = 'google/gemini-2.5-flash';
 
 const insecureTlsAgent = new Agent({
   connect: {
@@ -217,6 +218,106 @@ export async function recognizeProblemFromImage(
   }
 
   return recognizedText;
+}
+
+export type ChatMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+/*
+ * 소크라 튜터용 스트리밍 호출.
+ * OpenRouter SSE 응답에서 delta 텍스트만 뽑아 plain text 스트림으로 변환한다.
+ * API 키는 이 서버 모듈 밖으로 나가지 않는다.
+ */
+export async function streamTutorReply(params: {
+  systemPrompt: string;
+  messages: ChatMessage[];
+}): Promise<ReadableStream<Uint8Array>> {
+  const model = getModel('OPENROUTER_TUTOR_MODEL', DEFAULT_TUTOR_MODEL);
+  const allowInsecureTls =
+    process.env.OPENROUTER_ALLOW_INSECURE_TLS === 'true' ||
+    process.env.OPENROUTER_ALLOW_INSECURE_TLS === '1';
+
+  const requestInit: RequestInit & { dispatcher?: Agent } = {
+    method: 'POST',
+    headers: getOpenRouterHeaders(),
+    body: JSON.stringify({
+      model,
+      stream: true,
+      temperature: 0.7,
+      max_tokens: 900,
+      messages: [{ role: 'system', content: params.systemPrompt }, ...params.messages],
+    }),
+  };
+
+  if (allowInsecureTls) {
+    requestInit.dispatcher = insecureTlsAgent;
+  }
+
+  const response = await fetch(OPENROUTER_URL, requestInit);
+
+  if (!response.ok || !response.body) {
+    const errorText = await response.text().catch(() => '');
+    throw new Error(`OpenRouter tutor request failed: ${response.status} ${errorText.slice(0, 300)}`);
+  }
+
+  const upstream = response.body;
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = '';
+
+  return new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstream.getReader();
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith('data:')) {
+              continue;
+            }
+
+            const payload = trimmed.slice(5).trim();
+            if (payload === '[DONE]') {
+              continue;
+            }
+
+            try {
+              const json = JSON.parse(payload) as {
+                choices?: Array<{ delta?: { content?: string } }>;
+              };
+              const piece = json.choices?.[0]?.delta?.content;
+              if (piece) {
+                controller.enqueue(encoder.encode(piece));
+              }
+            } catch {
+              /* 파싱 불가한 SSE 조각은 무시 */
+            }
+          }
+        }
+
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      } finally {
+        reader.releaseLock();
+      }
+    },
+    cancel() {
+      upstream.cancel().catch(() => {});
+    },
+  });
 }
 
 export async function generateSolution(params: {

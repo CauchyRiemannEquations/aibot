@@ -13,7 +13,7 @@ type ChatMessage = {
 
 function TypingDots() {
   return (
-    <span className="tutor-dots" aria-label="소크라가 생각 중">
+    <span className="tutor-dots" aria-label="SOCRA가 생각 중">
       <span />
       <span />
       <span />
@@ -124,7 +124,7 @@ export default function HomePage() {
 
       if (!response.ok || !response.body) {
         const data = await response.json().catch(() => null);
-        throw new Error(data?.error || '소크라가 대답하지 못했어요. 잠시 후 다시 시도해 주세요.');
+        throw new Error(data?.error || 'SOCRA가 대답하지 못했어요. 잠시 후 다시 시도해 주세요.');
       }
 
       const reader = response.body.getReader();
@@ -150,7 +150,7 @@ export default function HomePage() {
 
       if (!gotAnything) {
         setMessages((prev) => prev.slice(0, -1));
-        setError('소크라가 빈 응답을 보냈어요. 다시 시도해 주세요.');
+        setError('SOCRA가 빈 응답을 보냈어요. 다시 시도해 주세요.');
       }
     } catch (err) {
       setMessages((prev) => {
@@ -222,7 +222,7 @@ export default function HomePage() {
         <div className="tutor-chatwrap">
           <header className="tutor-header">
             <span className="tutor-header-mark">
-              소크라<span className="tutor-q">?</span>
+              SOCRA<span className="tutor-q">?</span>
             </span>
             <span className="tutor-subject-chip">{subjectLabel}</span>
             <span className="tutor-header-spacer" />
@@ -236,7 +236,7 @@ export default function HomePage() {
               {messages.map((message, index) => (
                 <div key={index} className={`tutor-msg ${message.role}`}>
                   <div className="tutor-bubble">
-                    {message.role === 'assistant' && <span className="tutor-speaker">소크라</span>}
+                    {message.role === 'assistant' && <span className="tutor-speaker">SOCRA</span>}
                     {message.role === 'assistant' &&
                     !message.content &&
                     streaming &&
@@ -279,7 +279,7 @@ export default function HomePage() {
                 </button>
               )}
             </div>
-            <p className="tutor-footnote">소크라는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
+            <p className="tutor-footnote">SOCRA는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
           </div>
         </div>
       </div>
@@ -290,13 +290,12 @@ export default function HomePage() {
     <div className="app-shell">
       <main className="app-page app-page-simple app-page-no-header">
         <section className="tutor-hero">
-          <p className="tutor-eyebrow">SOCRATIC MATH TUTOR</p>
           <h1 className="tutor-wordmark">
-            소크라<span className="tutor-q">?</span>
+            SOCRA<span className="tutor-q">?</span>
           </h1>
           <p className="tutor-tagline">
-            <b>정답은 절대 말하지 않는</b> 수학 튜터. 답을 달라고 조르면? 소용없어요. 대신 좋은 질문을
-            하나씩 던져서, 결국 <b>네가 직접</b> 답에 도착하게 해요.
+            <b>정답은 절대 말하지 않는</b> 수학 튜터. 좋은 질문을 하나씩 던져서, 결국{' '}
+            <b>네가 직접</b> 답에 도착하게 해요.
           </p>
         </section>
 
@@ -317,9 +316,6 @@ export default function HomePage() {
               );
             })}
           </div>
-          <p className="tutor-scope-note">
-            선택한 과목의 교육과정 위계 안에서만 힌트를 줘요. (예: 벡터는 기하를 선택했을 때만)
-          </p>
         </section>
 
         <section className="main-layout">
@@ -340,7 +336,11 @@ export default function HomePage() {
                   <button type="button" className="upload-file-chip" onClick={openFilePicker}>
                     문제 사진 올리기
                   </button>
-                  <div className="upload-bubble">정답 대신 질문을 던지는 AI 튜터, 소크라예요.</div>
+                  <div className="upload-bubble">
+                    정답 대신 질문을 던지는 튜터
+                    <br />
+                    SOCRA예요
+                  </div>
                   <img src="/robot-mascot.png" alt="문제 안내 로봇" className="upload-mascot" />
                 </div>
               )}
@@ -370,12 +370,18 @@ export default function HomePage() {
                 value={problemText}
                 onChange={(event) => setProblemText(event.target.value)}
               />
+              {problemText.trim() ? (
+                <div className="tutor-problem-preview">
+                  <span className="tutor-preview-label">수식 미리보기</span>
+                  <MarkdownViewer content={problemText} />
+                </div>
+              ) : null}
             </div>
 
             {error ? <div className="error-banner">{error}</div> : null}
 
             <button type="button" className="primary-button tutor-startbtn" disabled={!canStart} onClick={startSession}>
-              소크라와 질문 시작하기
+              SOCRA와 질문 시작하기
             </button>
             <p className="tutor-privacy">힌트 사다리를 한 칸씩만 내려가요 · 진단 → 개념 → 분해 → 유사 예시</p>
           </article>

@@ -62,7 +62,7 @@ export function buildSocraticSystemPrompt(params: {
   );
   const forbiddenLines = getForbiddenConceptLines(subject.id);
 
-  return `너는 '소크라'라는 이름의 한국 고등학교 수학 소크라테스식 튜터다. 너의 유일한 목표는 학생이 스스로 생각해서 답에 도달하게 만드는 것이다.
+  return `너는 'SOCRA'라는 이름의 한국 고등학교 수학 소크라테스식 튜터다. 너의 유일한 목표는 학생이 스스로 생각해서 답에 도달하게 만드는 것이다.
 
 【절대 규칙 — 어떤 예외도 없음】
 1. 최종 답(숫자, 식, 완성된 풀이 전체)을 절대 먼저 말하지 않는다.

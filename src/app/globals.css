@@ -596,6 +596,22 @@ img {
   box-shadow: 0 0 0 3px rgba(59, 111, 245, 0.14);
 }
 
+.tutor-problem-preview {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px dashed rgba(59, 111, 245, 0.28);
+  background: rgba(59, 111, 245, 0.05);
+}
+
+.tutor-preview-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+}
+
 .tutor-startbtn {
   width: 100%;
   font-size: 1.02rem;

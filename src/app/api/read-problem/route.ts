@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 
-import { fileToDataUrl } from '@/lib/image';
-import { recognizeProblemFromImage } from '@/lib/openrouter';
+import { resolveSingleModeProvider } from '@/lib/ai/credential-resolver';
+import { toStudentMessage } from '@/lib/ai/errors';
+import { validateImageFile } from '@/lib/image';
+
+export const runtime = 'nodejs';
 
 const MAX_IMAGE_SIZE_MB = Number(process.env.MAX_IMAGE_SIZE_MB ?? 8);
 
@@ -11,28 +14,25 @@ export async function POST(request: Request) {
     const image = formData.get('image');
 
     if (!(image instanceof File)) {
-      return NextResponse.json(
-        { error: '문제 사진을 먼저 올려 주세요.' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: '문제 사진을 먼저 올려 주세요.' }, { status: 400 });
     }
 
-    if (!image.type.startsWith('image/')) {
-      return NextResponse.json(
-        { error: '사진 파일만 올릴 수 있어요.' },
-        { status: 400 },
-      );
+    const validated = await validateImageFile(image, MAX_IMAGE_SIZE_MB * 1024 * 1024);
+    if (!validated.ok) {
+      const message =
+        validated.error === 'too_large'
+          ? `사진 용량은 ${MAX_IMAGE_SIZE_MB}MB 이하로 올려 주세요.`
+          : '사진 파일만 올릴 수 있어요.';
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    if (image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-      return NextResponse.json(
-        { error: `사진 용량은 ${MAX_IMAGE_SIZE_MB}MB 이하로 올려 주세요.` },
-        { status: 400 },
-      );
-    }
-
-    const dataUrl = await fileToDataUrl(image);
-    const recognizedProblem = await recognizeProblemFromImage(dataUrl, image.type);
+    const resolved = resolveSingleModeProvider();
+    const recognizedProblem = await resolved.adapter.recognizeProblemFromImage({
+      apiKey: resolved.apiKey,
+      model: resolved.models.visionModel,
+      dataUrl: validated.dataUrl,
+      mimeType: validated.mimeType,
+    });
 
     if (!recognizedProblem) {
       return NextResponse.json(
@@ -43,11 +43,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ recognizedProblem });
   } catch (error) {
-    console.error(error);
-
-    return NextResponse.json(
-      { error: '문제를 읽는 중에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.' },
-      { status: 500 },
-    );
+    console.error('[read-problem] failed');
+    return NextResponse.json({ error: toStudentMessage(error, 'ocr') }, { status: 500 });
   }
 }

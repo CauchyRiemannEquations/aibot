@@ -8,7 +8,7 @@ import {
   normalizeSolverSections,
   sectionsToMarkdown,
 } from '@/lib/prompts';
-import { generateSolution } from '@/lib/openrouter';
+import { resolveSingleModeProvider } from '@/lib/ai/credential-resolver';
 import { retrieveRelevantCards } from '@/lib/rag';
 import type { SubjectId } from '@/lib/types';
 
@@ -46,7 +46,10 @@ export async function POST(request: Request) {
       allowedSubjectLabels: scopedSubjectLabels,
     });
 
-    const rawSolution = await generateSolution({
+    const resolved = resolveSingleModeProvider();
+    const rawSolution = await resolved.adapter.generateSolution({
+      apiKey: resolved.apiKey,
+      model: resolved.models.solverModel ?? resolved.models.tutorModel,
       systemPrompt,
       userPrompt,
     });

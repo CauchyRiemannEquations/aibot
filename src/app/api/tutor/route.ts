@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
+import { resolveSingleModeProvider } from '@/lib/ai/credential-resolver';
+import type { ChatMessage } from '@/lib/ai/types';
 import { loadConceptCardsForSubjectScope } from '@/lib/cards';
-import { streamTutorReply, type ChatMessage } from '@/lib/openrouter';
 import { retrieveRelevantCards } from '@/lib/rag';
 import { buildSocraticSystemPrompt } from '@/lib/socratic';
 import { SUBJECTS } from '@/lib/subjects';
@@ -67,7 +68,13 @@ export async function POST(request: Request) {
       cards: retrievedCards,
     });
 
-    const stream = await streamTutorReply({ systemPrompt, messages });
+    const resolved = resolveSingleModeProvider();
+    const stream = await resolved.adapter.streamTutorReply({
+      apiKey: resolved.apiKey,
+      model: resolved.models.tutorModel,
+      systemPrompt,
+      messages,
+    });
 
     return new Response(stream, {
       headers: {

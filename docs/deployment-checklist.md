@@ -14,8 +14,8 @@
 - [ ] 실행이 성공(오류 없음)했는지 확인
 - [ ] **Authentication → Providers → Email** 활성화, **Magic Link** 켜기
 - [ ] **Authentication → URL Configuration**
-  - [ ] `Site URL` 을 배포할 주소로 설정 (예: `https://socra.example.com`)
-  - [ ] `Redirect URLs` 에 `https://socra.example.com/auth/callback` 추가
+  - [ ] `Site URL` 을 배포할 주소로 설정 (예: `https://pulli.example.com`)
+  - [ ] `Redirect URLs` 에 `https://pulli.example.com/auth/callback` 추가
 
 ## B. 암호화 키 생성
 
@@ -32,7 +32,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - [ ] <https://vercel.com> 에서 GitHub 저장소 import
 - [ ] **Settings → Environment Variables** 에 아래 값 모두 등록 (Production/Preview)
   - [ ] `APP_MODE` = `platform`
-  - [ ] `NEXT_PUBLIC_APP_URL` = 배포 도메인 (예: `https://socra.example.com`)
+  - [ ] `NEXT_PUBLIC_APP_URL` = 배포 도메인 (예: `https://pulli.example.com`)
   - [ ] `NEXT_PUBLIC_SUPABASE_URL` = A에서 복사한 Project URL
   - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` = A의 anon 키
   - [ ] `SUPABASE_SERVICE_ROLE_KEY` = A의 service_role 키
@@ -54,7 +54,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - [ ] `반 만들기` 로 테스트 반 생성
 - [ ] 반 상세에서 학생 링크 복사 / QR 다운로드
 - [ ] 시크릿 창에서 학생 링크 열기 → 제공업체·API 같은 단어가 안 보이는지 확인
-- [ ] 문제 사진 업로드 → 인식 → SOCRA 대화가 스트리밍되는지 확인
+- [ ] 문제 사진 업로드 → 인식 → PULLI 대화가 스트리밍되는지 확인
 - [ ] 한도를 낮게 설정해 초과 시 일반 안내가 뜨는지 확인
 - [ ] 반 비활성화 → 학생 링크가 막히는지 확인
 

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 /*
  * 루트 페이지.
- * - single 모드: 기존 SOCRA 튜터를 그대로 노출 (현재 배포와 동일).
+ * - single 모드: 기존 PULLI 튜터를 그대로 노출 (현재 배포와 동일).
  * - platform 모드: 플랫폼 소개 + 교사 로그인 진입.
  */
 export default function HomePage() {
@@ -22,7 +22,7 @@ export default function HomePage() {
         <section className="platform-hero">
           <p className="platform-eyebrow">SOCRATIC MATH TUTOR PLATFORM</p>
           <h1 className="platform-title">
-            SOCRA<span className="tutor-q">?</span>
+            PULLI<span className="tutor-q">?</span>
           </h1>
           <p className="platform-lede">
             정답을 바로 알려주지 않고 <b>질문으로 생각하게 하는 수학 AI 튜터</b>를 우리 반 학생들에게.

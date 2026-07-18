@@ -155,7 +155,7 @@ export default function ClassDetailPage() {
             {copied ? '복사됨!' : '링크 복사'}
           </button>
         </div>
-        <QrCode value={classroom.studentUrl} downloadName={`socra-${classroom.slug.slice(0, 8)}`} />
+        <QrCode value={classroom.studentUrl} downloadName={`pulli-${classroom.slug.slice(0, 8)}`} />
         <label className="admin-toggle-row">
           <input
             type="checkbox"

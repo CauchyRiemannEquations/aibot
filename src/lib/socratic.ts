@@ -3,7 +3,7 @@ import { getSubjectById } from '@/lib/subjects';
 import type { RetrievedCard, SubjectId } from '@/lib/types';
 
 /*
- * SOCRA — 정답을 절대 말하지 않는 소크라테스식 수학 튜터.
+ * PULLI — 정답을 절대 말하지 않는 소크라테스식 수학 튜터.
  * 시스템 프롬프트는 서버에서만 조립하며 학생에게 노출되지 않는다.
  */
 
@@ -62,7 +62,7 @@ export function buildSocraticSystemPrompt(params: {
   );
   const forbiddenLines = getForbiddenConceptLines(subject.id);
 
-  return `너는 'SOCRA'라는 이름의 한국 고등학교 수학 튜터다. 목표는 학생이 스스로 답에 도달하게 만드는 것 — 단, 취조하듯 질문만 퍼붓는 게 아니라 옆에서 같이 걷는 선배처럼.
+  return `너는 'PULLI'라는 이름의 한국 고등학교 수학 튜터다. 목표는 학생이 스스로 답에 도달하게 만드는 것 — 단, 취조하듯 질문만 퍼붓는 게 아니라 옆에서 같이 걷는 선배처럼.
 
 【비밀은 딱 하나】
 '지금 이 문제'의 최종 답과 처음부터 끝까지의 완성 풀이, 이것만 비밀이다. 그 외의 것 — 개념 설명, 공식, 용어 정의, 일반적인 풀이 전략 — 은 학생이 물으면 아낌없이 명확하게 알려 준다. 개념을 설명할 때는 길어져도 괜찮다.

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
-import { CameraIcon, SendArrowIcon } from '@/components/socra-icons';
+import { CameraIcon, SendArrowIcon } from '@/components/pulli-icons';
 import { SUBJECTS } from '@/lib/subjects';
 import type { SubjectId } from '@/lib/types';
 
@@ -14,7 +14,7 @@ type ChatMessage = {
 
 function TypingDots() {
   return (
-    <span className="tutor-dots" aria-label="SOCRA가 생각 중">
+    <span className="tutor-dots" aria-label="PULLI가 생각 중">
       <span />
       <span />
       <span />
@@ -125,7 +125,7 @@ export function SingleTutor() {
 
       if (!response.ok || !response.body) {
         const data = await response.json().catch(() => null);
-        throw new Error(data?.error || 'SOCRA가 대답하지 못했어요. 잠시 후 다시 시도해 주세요.');
+        throw new Error(data?.error || 'PULLI가 대답하지 못했어요. 잠시 후 다시 시도해 주세요.');
       }
 
       const reader = response.body.getReader();
@@ -151,7 +151,7 @@ export function SingleTutor() {
 
       if (!gotAnything) {
         setMessages((prev) => prev.slice(0, -1));
-        setError('SOCRA가 빈 응답을 보냈어요. 다시 시도해 주세요.');
+        setError('PULLI가 빈 응답을 보냈어요. 다시 시도해 주세요.');
       }
     } catch (err) {
       setMessages((prev) => {
@@ -223,7 +223,7 @@ export function SingleTutor() {
         <div className="tutor-chatwrap">
           <header className="tutor-header">
             <span className="tutor-header-mark">
-              SOCRA<span className="tutor-q">?</span>
+              PULLI<span className="tutor-q">?</span>
             </span>
             <span className="tutor-subject-chip">{subjectLabel}</span>
             <span className="tutor-header-spacer" />
@@ -237,7 +237,7 @@ export function SingleTutor() {
               {messages.map((message, index) => (
                 <div key={index} className={`tutor-msg ${message.role}`}>
                   <div className="tutor-bubble">
-                    {message.role === 'assistant' && <span className="tutor-speaker">SOCRA</span>}
+                    {message.role === 'assistant' && <span className="tutor-speaker">PULLI</span>}
                     {message.role === 'assistant' &&
                     !message.content &&
                     streaming &&
@@ -280,7 +280,7 @@ export function SingleTutor() {
                 </button>
               )}
             </div>
-            <p className="tutor-footnote">SOCRA는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
+            <p className="tutor-footnote">PULLI는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export function SingleTutor() {
         <section className="tutor-hero">
           <p className="tutor-eyebrow">답 대신 질문, 나만의 수학 멘토</p>
           <h1 className="tutor-wordmark">
-            SOCRA<span className="tutor-q">?</span>
+            PULLI<span className="tutor-q">?</span>
           </h1>
           <p className="tutor-tagline">
             정답은 <b>절대</b> 안 나와. 질문을 하나씩 던져서 네가 <b className="mint">직접</b> 도착하게 만들지.

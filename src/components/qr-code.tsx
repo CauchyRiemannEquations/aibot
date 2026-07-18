@@ -29,7 +29,7 @@ export function QrCode({ value, downloadName }: { value: string; downloadName?: 
     <div className="qr-wrap">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={dataUrl} alt="학생 접속 QR 코드" className="qr-image" width={200} height={200} />
-      <a href={dataUrl} download={`${downloadName ?? 'socra-qr'}.png`} className="ghost-button qr-download">
+      <a href={dataUrl} download={`${downloadName ?? 'pulli-qr'}.png`} className="ghost-button qr-download">
         QR 다운로드
       </a>
     </div>

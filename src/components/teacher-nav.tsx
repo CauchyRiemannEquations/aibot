@@ -24,7 +24,7 @@ export function TeacherNav({ isOwner }: { isOwner: boolean }) {
   return (
     <header className="admin-topbar">
       <Link href="/teacher/dashboard" className="admin-brand">
-        SOCRA<span className="tutor-q">?</span>
+        PULLI<span className="tutor-q">?</span>
       </Link>
       <nav className="admin-nav">
         {LINKS.map((link) => (

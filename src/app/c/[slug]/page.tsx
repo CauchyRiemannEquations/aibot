@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
-import { CameraIcon, SendArrowIcon } from '@/components/socra-icons';
+import { CameraIcon, SendArrowIcon } from '@/components/pulli-icons';
 import { getSubjectById } from '@/lib/subjects';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
@@ -22,7 +22,7 @@ type Phase = 'loading' | 'access' | 'unavailable' | 'setup' | 'chat';
 
 function TypingDots() {
   return (
-    <span className="tutor-dots" aria-label="SOCRA가 생각 중">
+    <span className="tutor-dots" aria-label="PULLI가 생각 중">
       <span />
       <span />
       <span />
@@ -258,7 +258,7 @@ export default function StudentClassroomPage() {
         <main className="app-page app-page-simple">
           <section className="student-gate">
             <h1 className="tutor-wordmark">
-              SOCRA<span className="tutor-q">?</span>
+              PULLI<span className="tutor-q">?</span>
             </h1>
             <p className="student-gate-msg">{unavailableMsg}</p>
           </section>
@@ -273,7 +273,7 @@ export default function StudentClassroomPage() {
         <main className="app-page app-page-simple">
           <section className="student-gate">
             <h1 className="tutor-wordmark">
-              SOCRA<span className="tutor-q">?</span>
+              PULLI<span className="tutor-q">?</span>
             </h1>
             <p className="student-gate-msg">이 반은 접속 코드가 필요해요.</p>
             <form onSubmit={submitAccessCode} className="student-access-form">
@@ -301,7 +301,7 @@ export default function StudentClassroomPage() {
         <div className="tutor-chatwrap">
           <header className="tutor-header">
             <span className="tutor-header-mark">
-              SOCRA<span className="tutor-q">?</span>
+              PULLI<span className="tutor-q">?</span>
             </span>
             <span className="tutor-subject-chip">{subjectLabel}</span>
             <span className="tutor-header-spacer" />
@@ -316,7 +316,7 @@ export default function StudentClassroomPage() {
               {messages.map((message, index) => (
                 <div key={index} className={`tutor-msg ${message.role}`}>
                   <div className="tutor-bubble">
-                    {message.role === 'assistant' && <span className="tutor-speaker">SOCRA</span>}
+                    {message.role === 'assistant' && <span className="tutor-speaker">PULLI</span>}
                     {message.role === 'assistant' &&
                     !message.content &&
                     streaming &&
@@ -359,7 +359,7 @@ export default function StudentClassroomPage() {
                 </button>
               )}
             </div>
-            <p className="tutor-footnote">SOCRA는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
+            <p className="tutor-footnote">PULLI는 정답 대신 질문을 해요 · Enter 전송 · Shift+Enter 줄바꿈</p>
           </div>
         </div>
       </div>
@@ -372,7 +372,7 @@ export default function StudentClassroomPage() {
       <main className="app-page app-page-simple app-page-no-header">
         <section className="tutor-hero">
           <h1 className="tutor-wordmark">
-            SOCRA<span className="tutor-q">?</span>
+            PULLI<span className="tutor-q">?</span>
           </h1>
           <p className="tutor-tagline">
             질문으로 생각하는 수학 AI. 정답을 바로 알려주기보다 스스로 해결할 수 있도록 질문을 건넬게요.

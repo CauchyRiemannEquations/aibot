@@ -1,4 +1,4 @@
-# SOCRA (aibot)
+# PULLI (aibot)
 
 정답을 절대 말하지 않는 소크라테스식 AI 수학 튜터입니다.
 
@@ -51,7 +51,7 @@ OPENROUTER_SOLVER_MODEL=google/gemini-2.5-flash
 MAX_IMAGE_SIZE_MB=8
 ```
 
-`/` 에서 기존 SOCRA 튜터가 그대로 열립니다.
+`/` 에서 기존 PULLI 튜터가 그대로 열립니다.
 
 ## 2. platform 모드 실행
 

@@ -529,7 +529,7 @@ img {
   overflow-y: hidden;
 }
 
-/* ── SOCRA 튜터 ── */
+/* ── PULLI 튜터 ── */
 .tutor-hero {
   display: grid;
   gap: 6px;
@@ -1365,7 +1365,7 @@ img {
   .admin-logout { margin-left: 0; }
 }
 
-/* ═══════════════════ SOCRA 다크 네온 리디자인 (1c) ═══════════════════ */
+/* ═══════════════════ PULLI 다크 네온 리디자인 (1c) ═══════════════════ */
 /* 튜터 셋업·대화 화면 전용. .sk-dark 로 스코프해 교사/플랫폼 화면은 밝게 유지. */
 .sk-dark {
   --sk-bg: #14181d;

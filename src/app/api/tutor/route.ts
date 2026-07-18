@@ -86,7 +86,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: 'SOCRA를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.' },
+      { error: 'PULLI를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.' },
       { status: 500 },
     );
   }

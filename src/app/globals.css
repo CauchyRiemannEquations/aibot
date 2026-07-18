@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap');
+
 :root {
   color-scheme: light;
   --bg: #eef3ff;
@@ -1362,3 +1364,312 @@ img {
   .admin-topbar { gap: 8px; }
   .admin-logout { margin-left: 0; }
 }
+
+/* ═══════════════════ SOCRA 다크 네온 리디자인 (1c) ═══════════════════ */
+/* 튜터 셋업·대화 화면 전용. .sk-dark 로 스코프해 교사/플랫폼 화면은 밝게 유지. */
+.sk-dark {
+  --sk-bg: #14181d;
+  --sk-surface: #1c222a;
+  --sk-dropzone: #1a1f25;
+  --sk-chip: #1e242b;
+  --sk-tile: #0f1418;
+  --sk-border: #2c343d;
+  --sk-border-2: #29313a;
+  --sk-border-3: #232a31;
+  --sk-border-dash: #333d47;
+  --sk-tile-border: #2a323b;
+  --sk-ink: #eef3f0;
+  --sk-body: #d4ddd8;
+  --sk-muted: #9aa6a0;
+  --sk-dim: #7a868e;
+  --sk-dimmer: #6a767e;
+  --sk-chip-label: #8b979f;
+  --sk-accent: oklch(0.83 0.13 172);
+  --sk-on-accent: #0d1114;
+  --sk-display: 'Black Han Sans', 'Noto Sans KR', sans-serif;
+  --sk-sans: 'IBM Plex Sans KR', 'Noto Sans KR', sans-serif;
+
+  background: var(--sk-bg);
+  color: var(--sk-ink);
+  font-family: var(--sk-sans);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ── 셋업 레이아웃 ── */
+.sk-dark .app-page { width: min(468px, calc(100% - 44px)); padding: 16px 0 24px; }
+.sk-dark .app-page-no-header { padding-top: 18px; }
+.sk-dark .tutor-hero { padding: 0; gap: 0; }
+
+.sk-dark .tutor-eyebrow {
+  margin: 8px 0 0;
+  font-size: 10.5px;
+  letter-spacing: 0.24em;
+  font-weight: 600;
+  color: var(--sk-accent);
+}
+.sk-dark .tutor-wordmark {
+  margin: 4px 0 0;
+  font-family: var(--sk-display);
+  font-weight: 400;
+  font-size: clamp(44px, 14vw, 52px);
+  line-height: 0.98;
+  letter-spacing: 0;
+  color: var(--sk-ink);
+}
+.sk-dark .tutor-q { color: var(--sk-accent); }
+.sk-dark .tutor-tagline {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--sk-muted);
+  max-width: 27ch;
+  word-break: keep-all;
+  text-wrap: pretty;
+}
+.sk-dark .tutor-tagline b { color: var(--sk-ink); font-weight: 700; }
+.sk-dark .tutor-tagline b.mint { color: var(--sk-accent); }
+
+/* ── 과목 칩 ── */
+.sk-dark .subject-tabs { gap: 7px; margin-top: 20px; }
+.sk-dark .subject-tab {
+  min-width: 0;
+  padding: 8px 15px;
+  border-radius: 12px;
+  background: var(--sk-chip);
+  border: 1px solid var(--sk-border);
+  color: var(--sk-chip-label);
+  box-shadow: none;
+}
+.sk-dark .subject-tab.is-active {
+  background: var(--sk-accent);
+  border-color: var(--sk-accent);
+  color: var(--sk-on-accent);
+}
+.sk-dark .subject-tab-label { font-weight: 600; font-size: 12.5px; }
+
+/* ── 업로드 카드/드롭존 ── */
+.sk-dark .upload-card-simple {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  gap: 15px;
+  margin-top: 16px;
+}
+.sk-dark .upload-dropzone-simple {
+  border: 1.5px dashed var(--sk-border-dash);
+  border-radius: 22px;
+  background: var(--sk-dropzone);
+}
+.sk-dark .upload-dropzone-simple.has-preview {
+  border-style: solid;
+  border-color: var(--sk-border);
+  background: var(--sk-tile);
+}
+.sk-dark .upload-empty-simple {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 24px;
+  text-align: center;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.sk-dark .upload-icon-tile {
+  width: 70px;
+  height: 70px;
+  border-radius: 22px;
+  background: var(--sk-tile);
+  border: 1px solid var(--sk-tile-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sk-accent);
+}
+.sk-dark .upload-empty-text { display: grid; gap: 5px; }
+.sk-dark .upload-empty-title { font-weight: 700; font-size: 14px; color: var(--sk-ink); }
+.sk-dark .upload-empty-sub { font-size: 11.5px; line-height: 1.5; color: var(--sk-dim); }
+.sk-dark .upload-file-chip {
+  min-height: 0;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: var(--sk-accent);
+  color: var(--sk-on-accent);
+  font-weight: 700;
+  font-size: 12.5px;
+  box-shadow: none;
+}
+.sk-dark .preview-image { background: var(--sk-tile); }
+
+/* ── 고스트 버튼 (문제 바꾸기/문제 읽기/새 문제) ── */
+.sk-dark .ghost-button {
+  background: var(--sk-chip);
+  border: 1px solid var(--sk-border);
+  color: var(--sk-muted);
+  box-shadow: none;
+}
+.sk-dark .ghost-button:hover { color: var(--sk-ink); }
+
+/* ── 문제 입력/미리보기 ── */
+.sk-dark .solve-subject-label { color: var(--sk-ink); font-size: 0.9rem; }
+.sk-dark .tutor-problem-textarea {
+  background: var(--sk-surface);
+  border: 1.5px solid var(--sk-border);
+  color: var(--sk-ink);
+}
+.sk-dark .tutor-problem-textarea::placeholder { color: var(--sk-dimmer); }
+.sk-dark .tutor-problem-textarea:focus {
+  border-color: var(--sk-accent);
+  box-shadow: 0 0 0 3px oklch(0.83 0.13 172 / 0.16);
+}
+.sk-dark .tutor-problem-preview {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--sk-border);
+}
+.sk-dark .tutor-preview-label { color: var(--sk-accent); }
+.sk-dark .tutor-problem-preview .markdown { color: var(--sk-body); }
+
+/* ── CTA / 캡션 ── */
+.sk-dark .primary-button,
+.sk-dark .tutor-startbtn {
+  background: var(--sk-accent);
+  color: var(--sk-on-accent);
+  box-shadow: none;
+  border-radius: 16px;
+}
+.sk-dark .tutor-startbtn {
+  font-family: var(--sk-display);
+  font-weight: 400;
+  font-size: 17px;
+}
+.sk-dark .primary-button:disabled { opacity: 0.4; }
+.sk-dark .tutor-privacy { color: var(--sk-dimmer); font-size: 10.5px; }
+
+/* ── 대화 화면 ── */
+.sk-dark .tutor-chatwrap { background: var(--sk-bg); }
+.sk-dark .tutor-header {
+  background: rgba(20, 24, 29, 0.92);
+  border-bottom: 1px solid var(--sk-border-3);
+  padding: 8px 18px 12px;
+}
+.sk-dark .tutor-header-mark {
+  font-family: var(--sk-display);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--sk-ink);
+}
+.sk-dark .tutor-subject-chip {
+  background: var(--sk-chip);
+  border: 1px solid var(--sk-border);
+  color: var(--sk-accent);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 11px;
+  border-radius: 999px;
+}
+.sk-dark .tutor-newbtn {
+  min-height: 0;
+  width: auto;
+  flex: 0 0 auto;
+  background: var(--sk-chip);
+  border: 1px solid var(--sk-border);
+  color: var(--sk-muted);
+  border-radius: 11px;
+  padding: 7px 13px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.sk-dark .tutor-messages { background: var(--sk-bg); }
+.sk-dark .tutor-messages-inner { gap: 13px; max-width: 640px; }
+
+.sk-dark .tutor-msg.user .tutor-bubble {
+  background: var(--sk-accent);
+  color: var(--sk-on-accent);
+  border-radius: 16px 16px 5px 16px;
+  padding: 11px 15px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+.sk-dark .tutor-msg.user .tutor-bubble .markdown,
+.sk-dark .tutor-msg.user .tutor-bubble .markdown strong,
+.sk-dark .tutor-msg.user .tutor-bubble .markdown b { color: var(--sk-on-accent); }
+
+.sk-dark .tutor-msg.assistant .tutor-bubble {
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-border-2);
+  border-left: 3px solid var(--sk-accent);
+  border-radius: 5px 15px 15px 15px;
+  padding: 12px 15px;
+  box-shadow: none;
+  color: var(--sk-body);
+}
+.sk-dark .tutor-msg.assistant .tutor-bubble .markdown { color: var(--sk-body); }
+.sk-dark .tutor-msg.assistant .tutor-bubble .markdown strong,
+.sk-dark .tutor-msg.assistant .tutor-bubble .markdown b { color: #fff; }
+.sk-dark .tutor-speaker {
+  font-family: var(--sk-display);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--sk-accent);
+  margin-bottom: 5px;
+}
+.sk-dark .tutor-dots span { background: var(--sk-accent); }
+
+.sk-dark .tutor-composer {
+  background: rgba(20, 24, 29, 0.95);
+  border-top: 1px solid var(--sk-border-3);
+  padding: 11px 16px 16px;
+}
+.sk-dark .tutor-composer-inner { gap: 9px; max-width: 640px; }
+.sk-dark .tutor-composer textarea {
+  background: var(--sk-surface);
+  border: 1.5px solid var(--sk-border);
+  border-radius: 14px;
+  color: var(--sk-ink);
+}
+.sk-dark .tutor-composer textarea::placeholder { color: var(--sk-dimmer); }
+.sk-dark .tutor-composer textarea:focus {
+  border-color: var(--sk-accent);
+  box-shadow: 0 0 0 3px oklch(0.83 0.13 172 / 0.16);
+}
+.sk-dark .tutor-sendbtn {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: var(--sk-accent);
+  color: var(--sk-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sk-dark .tutor-sendbtn.stop { background: var(--danger); color: #fff; }
+.sk-dark .tutor-footnote { color: var(--sk-dimmer); }
+
+/* ── 오류/학생 보조 요소 (다크) ── */
+.sk-dark .error-banner {
+  background: rgba(207, 61, 91, 0.12);
+  border: 1px solid rgba(207, 61, 91, 0.4);
+  color: #ff9db0;
+}
+.sk-dark .student-remaining {
+  color: var(--sk-accent);
+  background: var(--sk-chip);
+  border: 1px solid var(--sk-border);
+}
+.sk-dark .tutor-subject-chip.subtle { background: var(--sk-chip); color: var(--sk-muted); border-color: var(--sk-border); }
+.sk-dark .student-guidance {
+  background: var(--sk-surface);
+  border: 1px solid var(--sk-border-2);
+  color: var(--sk-body);
+}
+.sk-dark .student-gate-msg,
+.sk-dark .student-center-note { color: var(--sk-muted); }
+.sk-dark .markdown { color: var(--sk-body); }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
+import { CameraIcon, SendArrowIcon } from '@/components/socra-icons';
 import { SUBJECTS } from '@/lib/subjects';
 import type { SubjectId } from '@/lib/types';
 
@@ -218,7 +219,7 @@ export function SingleTutor() {
 
   if (phase === 'chat') {
     return (
-      <div className="app-shell">
+      <div className="app-shell sk-dark">
         <div className="tutor-chatwrap">
           <header className="tutor-header">
             <span className="tutor-header-mark">
@@ -258,7 +259,7 @@ export function SingleTutor() {
             <div className="tutor-composer-inner">
               <textarea
                 rows={1}
-                placeholder="지금까지의 생각을 적어 보세요…"
+                placeholder="생각을 적어봐…"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleComposerKey}
@@ -275,7 +276,7 @@ export function SingleTutor() {
                   disabled={!input.trim()}
                   title="보내기"
                 >
-                  ↑
+                  <SendArrowIcon />
                 </button>
               )}
             </div>
@@ -287,15 +288,15 @@ export function SingleTutor() {
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell sk-dark">
       <main className="app-page app-page-simple app-page-no-header">
         <section className="tutor-hero">
+          <p className="tutor-eyebrow">답 대신 질문, 나만의 수학 멘토</p>
           <h1 className="tutor-wordmark">
             SOCRA<span className="tutor-q">?</span>
           </h1>
           <p className="tutor-tagline">
-            <b>정답은 절대 말하지 않는</b> 수학 튜터. 좋은 질문을 하나씩 던져서, 결국{' '}
-            <b>네가 직접</b> 답에 도착하게 해요.
+            정답은 <b>절대</b> 안 나와. 질문을 하나씩 던져서 네가 <b className="mint">직접</b> 도착하게 만들지.
           </p>
         </section>
 
@@ -332,17 +333,16 @@ export function SingleTutor() {
               {previewUrl ? (
                 <img src={previewUrl} alt="업로드한 문제 미리보기" className="preview-image" />
               ) : (
-                <div className="upload-empty upload-empty-simple">
-                  <button type="button" className="upload-file-chip" onClick={openFilePicker}>
-                    문제 사진 올리기
-                  </button>
-                  <div className="upload-bubble">
-                    정답 대신 질문을 던지는 튜터
-                    <br />
-                    SOCRA예요
-                  </div>
-                  <img src="/robot-mascot.png" alt="문제 안내 로봇" className="upload-mascot" />
-                </div>
+                <button type="button" className="upload-empty upload-empty-simple" onClick={openFilePicker}>
+                  <span className="upload-icon-tile">
+                    <CameraIcon />
+                  </span>
+                  <span className="upload-empty-text">
+                    <span className="upload-empty-title">문제 사진 올리기</span>
+                    <span className="upload-empty-sub">사진을 올리거나 직접 입력해도 돼</span>
+                  </span>
+                  <span className="upload-file-chip">사진 선택</span>
+                </button>
               )}
             </div>
 
@@ -381,9 +381,9 @@ export function SingleTutor() {
             {error ? <div className="error-banner">{error}</div> : null}
 
             <button type="button" className="primary-button tutor-startbtn" disabled={!canStart} onClick={startSession}>
-              SOCRA와 질문 시작하기
+              질문 시작하기
             </button>
-            <p className="tutor-privacy">힌트 사다리를 한 칸씩만 내려가요 · 진단 → 개념 → 분해 → 유사 예시</p>
+            <p className="tutor-privacy">진단 → 개념 → 분해 → 유사 예시</p>
           </article>
         </section>
       </main>

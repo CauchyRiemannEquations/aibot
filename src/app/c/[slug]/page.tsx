@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 
 import { MarkdownViewer } from '@/components/markdown-viewer';
+import { CameraIcon, SendArrowIcon } from '@/components/socra-icons';
 import { getSubjectById } from '@/lib/subjects';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
@@ -243,7 +244,7 @@ export default function StudentClassroomPage() {
   /* ── 상태별 화면 ── */
   if (phase === 'loading') {
     return (
-      <div className="app-shell">
+      <div className="app-shell sk-dark">
         <main className="app-page app-page-simple">
           <p className="student-center-note">불러오는 중…</p>
         </main>
@@ -253,7 +254,7 @@ export default function StudentClassroomPage() {
 
   if (phase === 'unavailable') {
     return (
-      <div className="app-shell">
+      <div className="app-shell sk-dark">
         <main className="app-page app-page-simple">
           <section className="student-gate">
             <h1 className="tutor-wordmark">
@@ -268,7 +269,7 @@ export default function StudentClassroomPage() {
 
   if (phase === 'access') {
     return (
-      <div className="app-shell">
+      <div className="app-shell sk-dark">
         <main className="app-page app-page-simple">
           <section className="student-gate">
             <h1 className="tutor-wordmark">
@@ -296,7 +297,7 @@ export default function StudentClassroomPage() {
 
   if (phase === 'chat') {
     return (
-      <div className="app-shell">
+      <div className="app-shell sk-dark">
         <div className="tutor-chatwrap">
           <header className="tutor-header">
             <span className="tutor-header-mark">
@@ -337,7 +338,7 @@ export default function StudentClassroomPage() {
             <div className="tutor-composer-inner">
               <textarea
                 rows={1}
-                placeholder="지금까지의 생각을 적어 보세요…"
+                placeholder="생각을 적어봐…"
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={handleComposerKey}
@@ -354,7 +355,7 @@ export default function StudentClassroomPage() {
                   disabled={!input.trim()}
                   title="보내기"
                 >
-                  ↑
+                  <SendArrowIcon />
                 </button>
               )}
             </div>
@@ -367,7 +368,7 @@ export default function StudentClassroomPage() {
 
   /* setup */
   return (
-    <div className="app-shell">
+    <div className="app-shell sk-dark">
       <main className="app-page app-page-simple app-page-no-header">
         <section className="tutor-hero">
           <h1 className="tutor-wordmark">
@@ -399,18 +400,16 @@ export default function StudentClassroomPage() {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={previewUrl} alt="업로드한 문제 미리보기" className="preview-image" />
               ) : (
-                <div className="upload-empty upload-empty-simple">
-                  <button type="button" className="upload-file-chip" onClick={openFilePicker}>
-                    문제 사진 올리기
-                  </button>
-                  <div className="upload-bubble">
-                    문제 사진을 올리거나
-                    <br />
-                    직접 입력해 주세요
-                  </div>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/robot-mascot.png" alt="문제 안내 로봇" className="upload-mascot" />
-                </div>
+                <button type="button" className="upload-empty upload-empty-simple" onClick={openFilePicker}>
+                  <span className="upload-icon-tile">
+                    <CameraIcon />
+                  </span>
+                  <span className="upload-empty-text">
+                    <span className="upload-empty-title">문제 사진 올리기</span>
+                    <span className="upload-empty-sub">사진을 올리거나 직접 입력해도 돼</span>
+                  </span>
+                  <span className="upload-file-chip">사진 선택</span>
+                </button>
               )}
             </div>
 
@@ -460,7 +459,7 @@ export default function StudentClassroomPage() {
               disabled={!canStart || limitReached}
               onClick={startSession}
             >
-              SOCRA와 질문 시작하기
+              질문 시작하기
             </button>
             <p className="tutor-privacy">문제 사진을 별도로 저장하지 않아요 · 문제 인식에만 잠깐 사용해요</p>
           </article>

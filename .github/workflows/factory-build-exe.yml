@@ -32,7 +32,8 @@ jobs:
           name: executables
           path: factory/dist/BamsamFactory*
       - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: factory-v0.1.0
+          name: "밤샘 문제공장 v0.1.0"
           files: factory/dist/BamsamFactory*

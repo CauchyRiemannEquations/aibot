@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     tags: ["factory-v*"]
+    branches: ["claude/template-pipeline-schema-u7etr9"]
+    paths: ["factory/**", ".github/workflows/factory-build-exe.yml"]
 
 permissions:
   contents: write
